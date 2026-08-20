@@ -1,0 +1,9 @@
+.env
+
+/vendor
+/node_modules
+
+phpinfo.php
+test_db.php
+
+*.log
