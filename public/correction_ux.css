@@ -1,0 +1,2 @@
+/* Korrektur-Layout */
+.form-line{display:grid;grid-template-columns:190px minmax(180px,1fr);gap:10px;align-items:center;margin-bottom:8px}.form-line label{font-weight:bold;white-space:normal}.form-line input,.form-line select,.form-line textarea{margin-left:0;width:100%}.form-line-full{grid-template-columns:190px minmax(240px,1fr)}@media(max-width:760px){.form-line,.form-line-full{grid-template-columns:1fr}}
