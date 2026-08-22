@@ -1,0 +1,14 @@
+{
+  "name": "wolkensprung/lszj-master-data-importer",
+  "description": "Importer fuer standardisierte Vereinsflieger-Excel-Exporte",
+  "type": "project",
+  "require": {
+    "php": "^8.2",
+    "phpoffice/phpspreadsheet": "^2.2 || ^3.0 || ^4.0 || ^5.0"
+  },
+  "autoload": {
+    "psr-4": {
+      "LSZJ\\MasterData\\": "src/MasterData/"
+    }
+  }
+}

@@ -7,7 +7,6 @@
 <title>Flug korrigieren</title>
 <link rel="stylesheet" href="app.css">
 <link rel="stylesheet" href="correction_ux.css">
-<link rel="stylesheet" href="master_data_autocomplete.css">
 </head>
 <body>
 <h1>Flug korrigieren</h1>
@@ -25,5 +24,4 @@ function sideWanted(ids){return ids.some(id=>qs(id)&&qs(id).value)}
 async function saveCorrection(){['date','glider','pilot','takeoff','gliderlanding','ft','charge','plane','towpilot','towlanding'].forEach(id=>mark(id,false));let errors=[];let gliderWanted=sideWanted(['glider','pilot','gliderlanding','ft','charge']);let motorWanted=sideWanted(['plane','towpilot','towlanding']);if(!qs('date').value){mark('date',true);errors.push('Datum fehlt')}if(!gliderWanted&&!motorWanted)errors.push('Segelflug- oder Motorflugdaten fehlen');if(gliderWanted){[['glider','Segelflugzeug fehlt'],['pilot','Segelflugpilot fehlt'],['takeoff','Startzeit fehlt'],['gliderlanding','Landung Segelflugzeug fehlt'],['ft','Flugart Segelflug fehlt'],['charge','Abrechnungsart fehlt']].forEach(x=>{if(!qs(x[0]).value){mark(x[0],true);errors.push(x[1])}})}if(motorWanted){[['plane','Motorflugzeug fehlt'],['towpilot','Motorpilot fehlt'],['takeoff','Startzeit fehlt'],['towlanding','Landung Motorflugzeug fehlt']].forEach(x=>{if(!qs(x[0]).value){mark(x[0],true);errors.push(x[1])}})}if(gliderWanted&&qs('gliderlanding').value&&qs('takeoff').value&&qs('gliderlanding').value<qs('takeoff').value){mark('gliderlanding',true);errors.push('Landung Segelflugzeug darf nicht vor Startzeit liegen')}if(motorWanted&&qs('towlanding').value&&qs('takeoff').value&&qs('towlanding').value<qs('takeoff').value){mark('towlanding',true);errors.push('Landung Motorflugzeug darf nicht vor Startzeit liegen')}if(errors.length){alert('Speichern nicht möglich.\n\nBitte ausfüllen/korrigieren:\n- '+[...new Set(errors)].join('\n- '));return}let payload={operation_id:opId,date:qs('date').value,user:qs('user').value,glider_callsign:qs('glider').value,pilot_name:qs('pilot').value,attendant_name:qs('att').value,tow_callsign:qs('plane').value,tow_pilot_name:qs('towpilot').value,takeoff_time:qs('takeoff').value,tow_landing_time:qs('towlanding').value,glider_landing_time:qs('gliderlanding').value,vf_flight_type_id:qs('ft').value,charge_mode:qs('charge').value,comment:qs('comment').value,tow_comment:qs('towcomment').value,merge_operation_id:qs('merge').value};let r=await (await fetch('../src/api_save_operation_correction.php',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)})).json();if(!r.ok){alert(r.error||'Fehler');return}backList(r.operation_id)}
 loadData();
 </script><script src="i18n.js"></script>
-<script src="master_data_autocomplete.js"></script>
 </body></html>
