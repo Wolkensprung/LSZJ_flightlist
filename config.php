@@ -1,9 +1,9 @@
 <?php
 return [
     'db' => [
-        'dsn' => 'mysql:host=sgbielc.mysql.db.internal;dbname=sgbielc_LSZJflightlist;charset=utf8mb4',
-        'user' => 'sgbielc_LSZJ',
-        'password' => 'FRsLEr0nOV%zQV8=C,4]DkbjDt5oSJ\O',
+        'dsn' => 'mysql:host=localhost;port=3306;dbname=lszj_flightlist;charset=utf8mb4',
+        'user' => 'lszj',
+        'password' => 'B23icMAaJDg95CHUZ28kj0X3Zcim3TJQ'
     ],
     'ktrax' => [
         'base_url' => 'https://ktrax.kisstech.ch/backend/logbook',

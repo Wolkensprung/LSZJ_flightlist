@@ -124,21 +124,15 @@ try {
     );
 
     foreach ($sorties as $idx => $f) {
-        // KTrax dokumentiert seq als eindeutige Sequenznummer pro Sortie.
-        // Eine FLARM-/Aircraft-ID ist nicht flugspezifisch und darf deshalb
-        // nie als alleiniger Dublettenschluessel verwendet werden.
-        $sourceUid = isset($f['seq']) && (string) $f['seq'] !== ''
-            ? (string) $f['seq']
-            : 'fallback:' . sha1(json_encode([
-                $f['date'] ?? $date,
-                $f['id'] ?? '',
+        $sourceUid = $f['seq']
+            ?? $f['id']
+            ?? sha1(json_encode([
+                $date,
+                $idx,
                 $f['cs'] ?? '',
-                $f['type'] ?? '',
-                $f['tkof']['time'] ?? '',
-                $f['tkof']['loc'] ?? '',
+                $f['tkof']['timestamp'] ?? '',
                 $f['ldg']['time'] ?? '',
-                $f['ldg']['loc'] ?? '',
-            ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
+            ]));
 
         $rawStmt->execute([
             $sourceUid,
@@ -163,8 +157,7 @@ try {
     $rows = $pdo->prepare(
         "SELECT *
          FROM raw_flights
-         WHERE source = 'ktrax'
-           AND flight_date = ?
+         WHERE flight_date = ?
          ORDER BY takeoff_time, aircraft_callsign"
     );
     $rows->execute([$date]);
@@ -189,22 +182,10 @@ try {
          LIMIT 1"
     );
 
-    // Primaere Paarung gemaess KTrax-Schnittstelle: glider.tow_seq -> towplane.seq.
-    $findTowRawBySeqStmt = $pdo->prepare(
+    $findTowRawStmt = $pdo->prepare(
         "SELECT *
          FROM raw_flights
-         WHERE source = 'ktrax'
-           AND source_uid = ?
-           AND aircraft_type = 2
-         LIMIT 1"
-    );
-
-    // Fallback nur fuer unvollstaendige historische KTrax-Datensaetze ohne tow_seq.
-    $findTowRawFallbackStmt = $pdo->prepare(
-        "SELECT *
-         FROM raw_flights
-         WHERE source = 'ktrax'
-           AND flight_date = ?
+         WHERE flight_date = ?
            AND aircraft_type = 2
            AND aircraft_callsign = ?
            AND tow_callsign = ?
@@ -292,9 +273,6 @@ try {
     $skippedExistingOperations = 0;
     $createdTowSegments = 0;
     $createdTowplaneOwnEntries = 0;
-    $towPairsBySeq = 0;
-    $towPairsByFallback = 0;
-    $towPairsMissing = 0;
 
     /**
      * 4. Segelflug-Operationen und F-Schlepp-Buchungen erzeugen.
@@ -324,31 +302,14 @@ try {
         $towSegmentEnd = null;
 
         if ($kind === 'glider_tow') {
-            $towRaw = null;
-            $towSeq = isset($rawJson['tow_seq']) && (string) $rawJson['tow_seq'] !== ''
-                ? (string) $rawJson['tow_seq']
-                : null;
+            $findTowRawStmt->execute([
+                $r['flight_date'],
+                $r['tow_callsign'],
+                $r['aircraft_callsign'],
+                $r['takeoff_time'],
+            ]);
 
-            if ($towSeq !== null) {
-                $findTowRawBySeqStmt->execute([$towSeq]);
-                $towRaw = $findTowRawBySeqStmt->fetch() ?: null;
-                if ($towRaw) {
-                    $towPairsBySeq++;
-                }
-            }
-
-            if (!$towRaw) {
-                $findTowRawFallbackStmt->execute([
-                    $r['flight_date'],
-                    $r['tow_callsign'],
-                    $r['aircraft_callsign'],
-                    $r['takeoff_time'],
-                ]);
-                $towRaw = $findTowRawFallbackStmt->fetch() ?: null;
-                if ($towRaw) {
-                    $towPairsByFallback++;
-                }
-            }
+            $towRaw = $findTowRawStmt->fetch();
 
             if ($towRaw) {
                 $towRawId = (int) $towRaw['id'];
@@ -359,9 +320,6 @@ try {
                 $towSegmentStart = dt_string($towRaw['flight_date'], $towRaw['takeoff_time']);
                 $towSegmentEnd = dt_string($towRaw['flight_date'], $towRaw['landing_time']);
             } else {
-                // Paarung fehlt: Operation bleibt korrigierbar, aber es wird kein
-                // erfundener Schleppflug verknuepft.
-                $towPairsMissing++;
                 $towSegmentStart = dt_string($r['flight_date'], $r['takeoff_time']);
             }
         }
@@ -497,9 +455,6 @@ try {
         'operations_skipped_existing' => $skippedExistingOperations,
         'tow_segments_created' => $createdTowSegments,
         'towplane_own_entries_created' => $createdTowplaneOwnEntries,
-        'tow_pairs_by_seq' => $towPairsBySeq,
-        'tow_pairs_by_fallback' => $towPairsByFallback,
-        'tow_pairs_missing' => $towPairsMissing,
     ]);
 } catch (Throwable $e) {
     $pdo->rollBack();
