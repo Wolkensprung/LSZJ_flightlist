@@ -3,6 +3,7 @@
 
 <link rel="stylesheet" href="app.css">
 <link rel="stylesheet" href="master_data_autocomplete.css">
+<link rel="stylesheet" href="external_pilot_form.css">
 </head><body>
 <h1>Flug manuell erfassen</h1><div class="nav"><a href="#" onclick="nav('dashboard.php');return false;">Dashboard</a><a href="#" onclick="nav('flight_approvals.php');return false;">Flugfreigaben</a><a href="#" onclick="nav('manual_flight.php');return false;">+ Flug manuell erfassen</a></div>
 <div class="card"><div class="row"><label>Datum <input id="date" type="date"></label><label>Status <select id="status"><option value="pending">pending</option><option value="all">all</option></select></label><label>Benutzer <input id="user" value="demo"></label></div></div>

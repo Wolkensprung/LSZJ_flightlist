@@ -8,6 +8,7 @@
 <link rel="stylesheet" href="app.css">
 <link rel="stylesheet" href="correction_ux.css">
 <link rel="stylesheet" href="master_data_autocomplete.css">
+<link rel="stylesheet" href="external_pilot_form.css">
 </head>
 <body>
 <h1>Flug korrigieren</h1>
