@@ -10,6 +10,10 @@
     const id = input.id || '';
 
     if (id === 'pilot' || id === 'att' || id === 'towpilot') return 'pilot';
+   if (id === 'glider' ||
+    id === 'plane') {
+    return 'aircraft';
+    }
     if (/^g\d+_(pilot|att)$/.test(id) || /^m\d+_towpilot$/.test(id)) return 'pilot';
 
     const key = [id, input.name || '', input.getAttribute('data-field') || '']
