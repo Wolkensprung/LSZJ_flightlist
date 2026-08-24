@@ -144,6 +144,9 @@ $writeRow = static function ($out, array $header, array $entry, ?array $towEntry
         ?? $entry['departure_location']
         ?? ''
     );
+    $row['offblock'] = $row['departuretime'];
+    $row['onblock']  = $row['arrivaltime'];
+
     $row['flighttime'] = $entry['flight_minutes']
         ?? (($type === 'tow_charge' || $type === 'towplane_own') ? ($entry['tow_minutes'] ?? '') : '');
     $row['landingcount'] = $entry['landing_count'] ?? 1;
