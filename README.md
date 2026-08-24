@@ -1,14 +1,25 @@
-# LSZJ externe Piloten
+# Vereinsflieger CSV-Export V2
 
-Enthalten:
-- `public/master_data_autocomplete.js` ersetzt die bestehende Datei.
-- `public/external_pilot_form.css` ergänzt die Darstellung.
-- `src/api_external_contacts.php` ersetzt die bisherige API und unterstützt `last_name`/`first_name`.
+## Dateien
+- `src/export_vf_members_csv.php`
+- `src/export_vf_flights_csv.php`
 
-CSS in allen drei Seiten nach `master_data_autocomplete.css` einbinden:
+## Voraussetzungen
+- `external_contacts.vf_exported_at`
+- `accounting_entries.vf_exported_at`
 
-```html
-<link rel="stylesheet" href="external_pilot_form.css">
-```
+## Aufruf
+Personen:
+`http://localhost:8000/src/export_vf_members_csv.php`
 
-Danach PHP neu starten und Browser mit Strg+F5 laden.
+Flüge, alle freigegebenen und noch nicht exportierten:
+`http://localhost:8000/src/export_vf_flights_csv.php`
+
+Optionaler Zeitraum:
+`http://localhost:8000/src/export_vf_flights_csv.php?from=2026-08-01&to=2026-08-31`
+
+## Filter
+Personen: aktiv und `vf_exported_at IS NULL`.
+Flüge: `approval_status = 'approved'` und `vf_exported_at IS NULL`.
+
+Nach Ausgabe werden die exportierten Datensätze markiert.
