@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 require __DIR__ . '/db.php';
 
+const VF_FLIGHT_TYPE_GVVC = 21;
+
 function vfDateTime(?string $value): string
 {
     if ($value === null || trim($value) === '') {
@@ -22,6 +24,20 @@ function addMinutes(?string $dateTime, mixed $minutes): ?string
         return null;
     }
     return date('Y-m-d H:i:s', $timestamp + ((int)$minutes * 60));
+}
+
+function appendComment(string $comment, string $line): string
+{
+    $comment = trim($comment);
+    $line = trim($line);
+
+    if ($line === '') {
+        return $comment;
+    }
+    if ($comment === '') {
+        return $line;
+    }
+    return $comment . "\n" . $line;
 }
 
 $pdo = db();
@@ -119,7 +135,7 @@ $writeRow = static function ($out, array $header, array $entry, ?array $towEntry
             ?? ''
         );
     } elseif ($type === 'tow_charge' || $type === 'towplane_own') {
-        // Nur für eigenständige bzw. verwaiste Motor-/Schleppflüge.
+        // Eigenständige bzw. verwaiste Motor-/Schleppflüge.
         $row['callsign'] = trim((string)($entry['tow_callsign'] ?? '')) !== ''
             ? (string)$entry['tow_callsign']
             : (string)($entry['callsign'] ?? '');
@@ -132,7 +148,10 @@ $writeRow = static function ($out, array $header, array $entry, ?array $towEntry
 
     $arrival = $entry['arrival_time'] ?? null;
     if (($type === 'tow_charge' || $type === 'towplane_own') && !$arrival) {
-        $arrival = addMinutes($entry['departure_time'] ?? null, $entry['tow_minutes'] ?? $entry['flight_minutes'] ?? null);
+        $arrival = addMinutes(
+            $entry['departure_time'] ?? null,
+            $entry['tow_minutes'] ?? $entry['flight_minutes'] ?? null
+        );
     }
 
     $row['departuretime'] = vfDateTime($entry['departure_time'] ?? null);
@@ -145,7 +164,7 @@ $writeRow = static function ($out, array $header, array $entry, ?array $towEntry
         ?? ''
     );
     $row['offblock'] = $row['departuretime'];
-    $row['onblock']  = $row['arrivaltime'];
+    $row['onblock'] = $row['arrivaltime'];
 
     $row['flighttime'] = $entry['flight_minutes']
         ?? (($type === 'tow_charge' || $type === 'towplane_own') ? ($entry['tow_minutes'] ?? '') : '');
@@ -158,6 +177,21 @@ $writeRow = static function ($out, array $header, array $entry, ?array $towEntry
     $row['km'] = $entry['km'] ?? '';
     $row['planewkz'] = (string)($entry['plane_wkz'] ?? '');
     $row['planedesignation'] = (string)($entry['plane_designation'] ?? '');
+
+    // Spezialfall GVVC (Vereinsflieger-Flugart-ID 21):
+    // Die Rechnung geht an das Vereinsflieger-Mitglied "GVVC".
+    // Der tatsächlich fliegende bzw. zahlende Pilot bleibt im Kommentar erhalten.
+    if ((int)($entry['vf_flight_type_id'] ?? 0) === VF_FLIGHT_TYPE_GVVC) {
+        $actualPilot = trim((string)$row['pilotname']);
+        $row['pilotname'] = 'GVVC';
+
+        if ($actualPilot !== '') {
+            $row['comment'] = appendComment(
+                (string)$row['comment'],
+                'GVVC-Pilot: ' . $actualPilot
+            );
+        }
+    }
 
     fputcsv($out, array_values($row), ';', '"', '\\');
 };
