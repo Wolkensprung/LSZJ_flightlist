@@ -4,6 +4,37 @@ declare(strict_types=1);
 require_once __DIR__ . '/permissions.php';
 
 const DUTY_OFFICER_LOCK = 'lszj_active_duty_officer';
+const DUTY_OFFICER_ALLOWED_PRIORITY_GROUPS = ['flying_member', 'student', 'gvvc'];
+
+function duty_officer_user_is_eligible(int $userId): bool
+{
+    $sql = "SELECT 1
+            FROM users u
+            INNER JOIN pilots_master pm ON pm.id = u.pilot_master_id
+            INNER JOIN user_roles ur ON ur.user_id = u.id
+            INNER JOIN roles r ON r.id = ur.role_id
+            WHERE u.id = :user_id
+              AND u.active = 1
+              AND pm.is_active = 1
+              AND pm.is_selectable = 1
+              AND pm.priority_group IN ('flying_member', 'student', 'gvvc')
+              AND r.code IN ('DUTY_OFFICER', 'ADMIN')
+              AND (ur.valid_from IS NULL OR ur.valid_from <= NOW())
+              AND (ur.valid_until IS NULL OR ur.valid_until >= NOW())
+            LIMIT 1";
+    $stmt = db()->prepare($sql);
+    $stmt->execute(['user_id' => $userId]);
+    return $stmt->fetchColumn() !== false;
+}
+
+function duty_officer_assert_eligible(int $userId): void
+{
+    if (!duty_officer_user_is_eligible($userId)) {
+        throw new RuntimeException(
+            'Flugdienstleiter können nur aktive fliegende Mitglieder, Flugschüler oder GVVC-Mitglieder mit entsprechender Rolle sein.'
+        );
+    }
+}
 
 function duty_officer_active(): ?array
 {
@@ -34,8 +65,9 @@ function duty_officer_release_lock(PDO $pdo): void
 
 function duty_officer_start(): int
 {
-    require_role('DUTY_OFFICER');
     $user = auth_require_login();
+    duty_officer_assert_eligible((int)$user['id']);
+
     $pdo = db();
     duty_officer_acquire_lock($pdo);
     try {
@@ -55,18 +87,16 @@ function duty_officer_start(): int
 
 function duty_officer_handover(int $newUserId, ?string $reason = null): int
 {
-    require_role('DUTY_OFFICER');
     $current = auth_require_login();
+    duty_officer_assert_eligible((int)$current['id']);
+    duty_officer_assert_eligible($newUserId);
+
     $pdo = db();
     duty_officer_acquire_lock($pdo);
     try {
         $active = duty_officer_active();
         if ($active === null || (int)$active['user_id'] !== (int)$current['id']) {
             throw new RuntimeException('Nur der aktive Flugdienstleiter kann den Dienst übergeben.');
-        }
-        $newRoles = auth_load_roles($newUserId);
-        if (!in_array('DUTY_OFFICER', $newRoles, true) && !in_array('ADMIN', $newRoles, true)) {
-            throw new RuntimeException('Der Zielbenutzer hat keine Flugdienstleiter-Berechtigung.');
         }
 
         $pdo->beginTransaction();
@@ -84,6 +114,7 @@ function duty_officer_handover(int $newUserId, ?string $reason = null): int
             if ($close->rowCount() !== 1) {
                 throw new RuntimeException('Die Flugdienstleiter-Schicht wurde zwischenzeitlich geändert.');
             }
+
             $open = $pdo->prepare(
                 'INSERT INTO duty_officer_shifts (user_id, start_time) VALUES (:user_id, NOW())'
             );
@@ -104,8 +135,9 @@ function duty_officer_handover(int $newUserId, ?string $reason = null): int
 
 function duty_officer_end(?string $reason = null): void
 {
-    require_role('DUTY_OFFICER');
     $current = auth_require_login();
+    duty_officer_assert_eligible((int)$current['id']);
+
     $pdo = db();
     duty_officer_acquire_lock($pdo);
     try {

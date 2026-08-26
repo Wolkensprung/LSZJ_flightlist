@@ -1,11 +1,14 @@
-<?php /* public/manual_flight.php */ ?>
+<?php
+require_once __DIR__ . '/../src/page_security.php';
+$currentUser = lszj_require_page_login();
+ /* public/manual_flight.php */ ?>
 <!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Flug manuell erfassen</title>
 
 <link rel="stylesheet" href="app.css">
 <link rel="stylesheet" href="master_data_autocomplete.css">
 <link rel="stylesheet" href="external_pilot_form.css">
 </head><body>
-<h1>Flug manuell erfassen</h1><div class="nav"><a href="#" onclick="nav('dashboard.php');return false;">Dashboard</a><a href="#" onclick="nav('flight_approvals.php');return false;">Flugfreigaben</a><a href="#" onclick="nav('manual_flight.php');return false;">+ Flug manuell erfassen</a></div>
+<h1>Flug manuell erfassen</h1><div class="nav"><a href="#" onclick="nav('dashboard.php');return false;">Dashboard</a><a href="#" onclick="nav('flight_approvals.php');return false;">Flugfreigaben</a><a href="#" onclick="nav('manual_flight.php');return false;">+ Flug manuell erfassen</a><a href="duty_officer.php">Flugdienstleiter</a></div>
 <div class="card"><div class="row"><label>Datum <input id="date" type="date"></label><label>Status <select id="status"><option value="pending">pending</option><option value="all">all</option></select></label><label>Benutzer <input id="user" value="demo"></label></div></div>
 <div class="tabs"><button id="b_glider" onclick="showMode('glider')">Segelflug</button><button id="b_tow" onclick="showMode('tow')">Motorflug</button><button id="b_pair" onclick="showMode('pair')">Segelflug + Motorflug</button><button id="b_attachTow" onclick="showMode('attachTow')">Schlepp zu Segelflug</button><button id="b_attachGlider" onclick="showMode('attachGlider')">Segelflug zu Schlepp</button></div><div id="content"></div>
 <script>

@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 const SESSION_DEVICE_SMARTPHONE = 'SMARTPHONE';
 const SESSION_DEVICE_C_BUERO = 'C_BUERO';
-const SESSION_C_BUERO_TIMEOUT_SECONDS = 300;
+const SESSION_C_BUERO_TIMEOUT_SECONDS = 86400;
 
 function session_start_if_needed(): void
 {

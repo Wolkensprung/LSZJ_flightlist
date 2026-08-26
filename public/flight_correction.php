@@ -1,4 +1,7 @@
-<?php /* public/flight_correction.php */ ?>
+<?php
+require_once __DIR__ . '/../src/page_security.php';
+$currentUser = lszj_require_page_login();
+ /* public/flight_correction.php */ ?>
 <!doctype html>
 <html lang="de">
 <head>

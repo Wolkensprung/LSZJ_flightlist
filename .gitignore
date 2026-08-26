@@ -7,3 +7,6 @@ phpinfo.php
 test_db.php
 
 *.log
+backups/
+*.bak-*
+backup_*.sql
