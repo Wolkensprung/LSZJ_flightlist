@@ -34,7 +34,7 @@ $activeDutyOfficer = duty_officer_active();
 </div>
 <h1>LSZJ Dashboard</h1>
 <div class="nav"><a href="#" onclick="nav('dashboard.php');return false;">Dashboard</a><a href="#" onclick="nav('flight_approvals.php');return false;">Flugfreigaben</a><a href="#" onclick="nav('manual_flight.php');return false;">+ Flug manuell erfassen</a></div>
-<div class="top"><label>Von <input id="from" type="date"></label><label>Bis <input id="to" type="date"></label><label>Status <select id="status"><option value="pending">pending</option><option value="correction_required">correction_required</option><option value="approved">approved</option><option value="all">all</option></select></label><button onclick="loadData()">Laden</button><button class="secondary" onclick="importKTraxRange()">kTrax-Import</button><button class="quick" onclick="setToday()">Heute</button><button class="quick" onclick="setYesterday()">Gestern</button><button class="quick" onclick="setLast7()">Letzte 7 Tage</button></div>
+<div class="top"><label>Von <input id="from" type="date"></label><label>Bis <input id="to" type="date"></label><label>Status <select id="status"><option value="pending">pending</option><option value="correction_required">correction_required</option><option value="approved">approved</option><option value="all">all</option></select></label><label>Benutzer <input id="user" value="demo"></label><button onclick="loadData()">Laden</button><button class="secondary" onclick="importKTraxRange()">kTrax-Import</button><button class="quick" onclick="setToday()">Heute</button><button class="quick" onclick="setYesterday()">Gestern</button><button class="quick" onclick="setLast7()">Letzte 7 Tage</button></div>
 <div id="rangeLabel" class="card"></div>
 <div id="metrics" class="grid"></div>
 <div class="card manualbox"><h2>Manuelle Flugerfassung</h2><p>Flüge ohne FLARM/KTrax nacherfassen oder Segel- und Motorflüge manuell verknüpfen.</p><p><a class="button" href="#" onclick="nav('manual_flight.php');return false;">+ Flug manuell erfassen</a></p></div>
@@ -50,13 +50,13 @@ function setRange(from,to){qs('from').value=from;qs('to').value=to;loadData()}
 function setToday(){setRange(todayISO(),todayISO())}
 function setYesterday(){const y=shiftISO(-1);setRange(y,y)}
 function setLast7(){setRange(shiftISO(-6),todayISO())}
-function rangeQuery(){return 'from='+encodeURIComponent(qs('from').value)+'&to='+encodeURIComponent(qs('to').value)+'&status='+encodeURIComponent(qs('status').value)}
+function rangeQuery(){return 'from='+encodeURIComponent(qs('from').value)+'&to='+encodeURIComponent(qs('to').value)+'&status='+encodeURIComponent(qs('status').value)+'&user='+encodeURIComponent(qs('user').value)}
 function exportRangeQuery(){return 'from='+encodeURIComponent(qs('from').value)+'&to='+encodeURIComponent(qs('to').value)}
 function singleDateForManual(){return qs('from').value||todayISO()}
-function nav(page){const currentUser=<?= json_encode((string)$user['display_name'], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>;if(page==='manual_flight.php'){location.href=page+'?date='+encodeURIComponent(singleDateForManual())+'&status='+encodeURIComponent(qs('status').value)+'&user='+encodeURIComponent(currentUser)}else if(page==='flight_approvals.php'){location.href=page+'?'+rangeQuery()+'&user='+encodeURIComponent(currentUser)}else{location.href=page+'?'+rangeQuery()}}
+function nav(page){if(page==='manual_flight.php'){location.href=page+'?date='+encodeURIComponent(singleDateForManual())+'&status='+encodeURIComponent(qs('status').value)+'&user='+encodeURIComponent(qs('user').value)}else{location.href=page+'?'+rangeQuery()}}
 function fmt(v){if(!v)return '';let s=String(v).replace('T',' ');let d=s.slice(0,10).split('-');return d.length===3?`${d[2]}.${d[1]}.${d[0]} ${s.slice(11,16)}`:s}
 function fmtDate(v){if(!v)return '';let d=String(v).slice(0,10).split('-');return d.length===3?`${d[2]}.${d[1]}.${d[0]}`:v}
-qs('from').value=getParam('from',getParam('date',todayISO()));qs('to').value=getParam('to',qs('from').value);qs('status').value=getParam('status','pending');
+qs('from').value=getParam('from',getParam('date',todayISO()));qs('to').value=getParam('to',qs('from').value);qs('status').value=getParam('status','pending');qs('user').value=getParam('user','demo');
 async function fetchJson(url){const response=await fetch(url,{credentials:'same-origin'});if(response.status===401){location.href='login.php?reason=expired';throw new Error('Anmeldung abgelaufen');}if(!response.ok)throw new Error(`HTTP ${response.status}`);return response.json()}
 async function loadData(){
  try{
