@@ -4,6 +4,7 @@ declare(strict_types=1);
 require __DIR__ . '/db.php';
 
 const VF_FLIGHT_TYPE_GVVC = 21;
+const VF_UID_GVVC = 349910;
 
 function vfDateTime(?string $value): string
 {
@@ -26,20 +27,6 @@ function addMinutes(?string $dateTime, mixed $minutes): ?string
     return date('Y-m-d H:i:s', $timestamp + ((int)$minutes * 60));
 }
 
-function appendComment(string $comment, string $line): string
-{
-    $comment = trim($comment);
-    $line = trim($line);
-
-    if ($line === '') {
-        return $comment;
-    }
-    if ($comment === '') {
-        return $line;
-    }
-    return $comment . "\n" . $line;
-}
-
 $pdo = db();
 $from = trim((string)($_GET['from'] ?? ''));
 $to = trim((string)($_GET['to'] ?? ''));
@@ -60,7 +47,7 @@ $header = [
     'arrivallocation','flighttime','landingcount','starttype','motorstart','motorend','chargemode',
     'invoiced','comment','towheight','towtime','towcallsign','towpilotname','towarrivallocation',
     'ftid','km','planewkz','planedesignation','wid','uidwinch','attendantname2','attendantname3',
-    'offblock','onblock','runwaydeparture','runwayarrival','checkin','checkout'
+    'offblock','onblock','runwaydeparture','runwayarrival','checkin','checkout','uidcharge'
 ];
 
 $sql = "SELECT id, operation_id, entry_type, callsign, pilot_name, attendant_name,
@@ -179,18 +166,11 @@ $writeRow = static function ($out, array $header, array $entry, ?array $towEntry
     $row['planedesignation'] = (string)($entry['plane_designation'] ?? '');
 
     // Spezialfall GVVC (Vereinsflieger-Flugart-ID 21):
-    // Die Rechnung geht an das Vereinsflieger-Mitglied "GVVC".
-    // Der tatsächlich fliegende bzw. zahlende Pilot bleibt im Kommentar erhalten.
+    // Pilot bleibt der tatsächliche Pilot. Die Rechnung geht über
+    // Abrechnungsart 7 (Anderes Mitglied) an die GVVC-Benutzernummer.
     if ((int)($entry['vf_flight_type_id'] ?? 0) === VF_FLIGHT_TYPE_GVVC) {
-        $actualPilot = trim((string)$row['pilotname']);
-        $row['pilotname'] = 'GVVC';
-
-        if ($actualPilot !== '') {
-            $row['comment'] = appendComment(
-                (string)$row['comment'],
-                'GVVC-Pilot: ' . $actualPilot
-            );
-        }
+        $row['chargemode'] = 7;
+        $row['uidcharge'] = VF_UID_GVVC;
     }
 
     fputcsv($out, array_values($row), ';', '"', '\\');
