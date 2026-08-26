@@ -10,3 +10,8 @@ test_db.php
 backups/
 *.bak-*
 backup_*.sql
+.env
+config.php
+backups/
+*.bak-*
+backup_*.sql
