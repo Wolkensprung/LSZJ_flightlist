@@ -8,6 +8,8 @@ require_once __DIR__ . '/motor_minutes.php';
 $actor = api_authenticated_actor(['PILOT', 'DUTY_OFFICER', 'ADMIN']);
 $pdo = db();
 $i = jinput();
+require_once __DIR__ . '/flight_day.php';
+flight_day_assert_request_editable($i, basename(__FILE__));
 $opId = (int)qv($i, 'operation_id', 0);
 if (!$opId) json_response(['ok'=>false,'error'=>'operation_id fehlt.'], 400);
 

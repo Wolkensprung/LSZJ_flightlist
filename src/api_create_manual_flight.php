@@ -15,6 +15,8 @@ require_once __DIR__ . '/api_authenticated_actor.php';
 $actor = api_authenticated_actor(['PILOT', 'DUTY_OFFICER', 'ADMIN']);
 $pdo = db();
 $input = json_decode(file_get_contents('php://input'), true) ?: $_POST;
+require_once __DIR__ . '/flight_day.php';
+flight_day_assert_request_editable($input, basename(__FILE__));
 $mode = $input['mode'] ?? '';
 $date = $input['date'] ?? date('Y-m-d');
 $force = !empty($input['force']);

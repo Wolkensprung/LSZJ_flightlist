@@ -6,6 +6,8 @@ $actor = api_authenticated_actor(['DUTY_OFFICER', 'ADMIN']);
 
 require __DIR__ . '/lszj_correction_lib.php';
 $pdo=db(); $input=jinput();
+require_once __DIR__ . '/flight_day.php';
+flight_day_assert_request_editable($input, basename(__FILE__));
 $operationId=(int)qv($input,'operation_id',0); $part=qv($input,'part');
 if(!$operationId || !in_array($part,['glider','motor'],true)) json_response(['ok'=>false,'error'=>'operation_id oder part fehlt.'],400);
 try{
@@ -23,7 +25,7 @@ try{
             update_row($pdo,'accounting_entries',[
                 'entry_type'=>'towplane_own','callsign'=>$plane,'arrival_time'=>add_minutes_sql($tc['departure_time'],$tc['tow_minutes']),
                 'flight_minutes'=>$tc['tow_minutes'],'tow_callsign'=>null,'tow_minutes'=>null,'tow_height_m'=>null,
-                'pilot_name'=>null,'attendant_name'=>null,'approval_status'=>'pending','exported_at'=>null,'export_batch'=>null
+                'pilot_name'=>null,'attendant_name'=>null,'approval_status'=>'pending','exported_at'=>null,'vf_exported_at'=>null,'export_batch'=>null
             ],'id=:id',['id'=>$tc['id']]);
             update_row($pdo,'operations',[
                 'kind'=>'towplane_only','glider_callsign'=>null,'glider_pilot_name'=>null,'instructor_name'=>null,
@@ -46,7 +48,7 @@ try{
         if($e['glider']){
             update_row($pdo,'accounting_entries',[
                 'start_type'=>1,'tow_callsign'=>null,'tow_pilot_name'=>null,'tow_minutes'=>null,'tow_height_m'=>null,
-                'approval_status'=>'pending','exported_at'=>null,'export_batch'=>null
+                'approval_status'=>'pending','exported_at'=>null,'vf_exported_at'=>null,'export_batch'=>null
             ],"operation_id=:operation_id AND entry_type='glider_flight'",['operation_id'=>$operationId]);
             update_row($pdo,'operations',[
                 'kind'=>'self_launch','tow_callsign'=>null,'tow_height_m'=>null,'approval_status'=>'pending',

@@ -1,0 +1,2 @@
+<?php
+declare(strict_types=1);require_once __DIR__.'/api_authenticated_actor.php';require_once __DIR__.'/flight_day.php';api_authenticated_actor(['DUTY_OFFICER','ADMIN']);$i=json_decode(file_get_contents('php://input'),true)?:$_POST;csrf_require_valid($i['csrf_token']??null);try{$date=(string)($i['date']??'');$result=flight_day_reopen(db(),$date,(string)($i['reason']??$i['note']??''));json_response($result);}catch(Throwable $e){json_response(['ok'=>false,'error'=>$e->getMessage()],422);}
