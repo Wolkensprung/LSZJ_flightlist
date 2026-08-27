@@ -126,6 +126,7 @@ try {
         // Nur accounting_entries werden exportiert. Deshalb nur dort Exportstatus zuruecksetzen.
         if ($entity === 'accounting_entry') {
             $sets[] = "exported_at = NULL";
+            $sets[] = "vf_exported_at = NULL";
             $sets[] = "export_batch = NULL";
         }
 

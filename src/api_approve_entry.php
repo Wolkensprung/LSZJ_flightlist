@@ -2,6 +2,7 @@
 require __DIR__ . '/db.php';
 require __DIR__ . '/helpers.php';
 require_once __DIR__ . '/api_authenticated_actor.php';
+require_once __DIR__ . '/flight_validation.php';
 $actor = api_authenticated_actor(['PILOT', 'DUTY_OFFICER', 'ADMIN']);
 $pdo = db();
 $input = json_decode(file_get_contents('php://input'), true) ?: $_POST;
@@ -9,6 +10,10 @@ $id = (int)($input['id'] ?? 0);
 $user = $actor['display_name'];
 $userId = $actor['id'];
 if (!$id) json_response(['error' => 'id fehlt'], 400);
+$check=$pdo->prepare('SELECT * FROM accounting_entries WHERE id=?');$check->execute([$id]);$entry=$check->fetch();
+if(!$entry) json_response(['ok'=>false,'error'=>'Eintrag nicht gefunden.'],404);
+$missing=flight_entry_missing_fields($entry);
+if($missing) json_response(['ok'=>false,'error'=>'Freigabe nicht möglich. Pflichtfelder fehlen oder sind ungültig.','missing_fields'=>[['entry_id'=>$id,'entry_type'=>$entry['entry_type'],'callsign'=>$entry['callsign'],'fields'=>$missing]]],422);
 $stmt = $pdo->prepare("UPDATE accounting_entries SET approval_status='approved', approved_by=?, approved_by_user_id=?, approved_at=NOW() WHERE id=? AND approval_status='pending'");
 $stmt->execute([$user, $userId, $id]);
 json_response(['ok' => true, 'changed' => $stmt->rowCount()]);

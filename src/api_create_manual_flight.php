@@ -306,6 +306,7 @@ try {
     // Required field checks first. This prevents PHP fatal errors from NULL callsigns.
     if ($mode === 'glider_only') {
         require_field(v($input, 'glider_callsign'), 'Segelflugzeug fehlt.');
+        require_field(v($input, 'pilot_name'), 'Segelflugpilot fehlt.');
         require_field(v($input, 'takeoff_time'), 'Startzeit fehlt.');
         require_field(v($input, 'landing_time'), 'Landezeit fehlt.');
         require_field(v($input, 'vf_flight_type_id'), 'Flugart fehlt.');
@@ -314,6 +315,7 @@ try {
         $checks[] = ['entry_type'=>'glider_flight','callsign'=>v($input,'glider_callsign'),'dep'=>dtv($date,v($input,'takeoff_time')),'arr'=>dtv($date,v($input,'landing_time')),'pilot'=>v($input,'pilot_name')];
     } elseif ($mode === 'towplane_only') {
         require_field(v($input, 'tow_callsign'), 'Motorflugzeug fehlt.');
+        require_field(v($input, 'tow_pilot_name'), 'Motorpilot fehlt.');
         require_field(v($input, 'takeoff_time'), 'Startzeit fehlt.');
         require_field(v($input, 'landing_time'), 'Landezeit fehlt.');
         require_field(v($input, 'vf_flight_type_id'), 'Flugart fehlt.');
@@ -322,7 +324,9 @@ try {
         $checks[] = ['entry_type'=>'towplane_own','callsign'=>v($input,'tow_callsign'),'dep'=>dtv($date,v($input,'takeoff_time')),'arr'=>dtv($date,v($input,'landing_time')),'pilot'=>v($input,'tow_pilot_name')];
     } elseif ($mode === 'pair') {
         require_field(v($input, 'glider_callsign'), 'Segelflugzeug fehlt.');
+        require_field(v($input, 'pilot_name'), 'Segelflugpilot fehlt.');
         require_field(v($input, 'tow_callsign'), 'Motorflugzeug fehlt.');
+        require_field(v($input, 'tow_pilot_name'), 'Motorpilot fehlt.');
         require_field(v($input, 'takeoff_time'), 'Startzeit fehlt.');
         require_field(v($input, 'tow_landing_time'), 'Landung Motorflugzeug fehlt.');
         require_field(v($input, 'glider_landing_time'), 'Landung Segelflugzeug fehlt.');
@@ -335,6 +339,7 @@ try {
     } elseif ($mode === 'attach_tow_to_glider') {
         require_field(v($input, 'operation_id'), 'Operation fehlt.');
         require_field(v($input, 'tow_callsign'), 'Motorflugzeug fehlt.');
+        require_field(v($input, 'tow_pilot_name'), 'Motorpilot fehlt.');
         require_field(v($input, 'takeoff_time'), 'Startzeit fehlt.');
         require_field(v($input, 'tow_landing_time'), 'Landung Motorflugzeug fehlt.');
         ensure_no_overnight(v($input, 'takeoff_time'), v($input, 'tow_landing_time'), 'Landung Motorflugzeug darf nicht vor der Startzeit liegen. Ein Flug dauert nie über Mitternacht.');
@@ -346,6 +351,7 @@ try {
     } elseif ($mode === 'attach_glider_to_towplane') {
         require_field(v($input, 'operation_id'), 'Operation fehlt.');
         require_field(v($input, 'glider_callsign'), 'Segelflugzeug fehlt.');
+        require_field(v($input, 'pilot_name'), 'Segelflugpilot fehlt.');
         require_field(v($input, 'takeoff_time'), 'Startzeit fehlt.');
         require_field(v($input, 'tow_landing_time'), 'Landung Motorflugzeug fehlt.');
         require_field(v($input, 'glider_landing_time'), 'Landung Segelflugzeug fehlt.');

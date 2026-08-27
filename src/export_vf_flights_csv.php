@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 require __DIR__ . '/db.php';
 require_once __DIR__ . '/motor_minutes.php';
+require_once __DIR__ . '/flight_validation.php';
 
 const VF_FLIGHT_TYPE_GVVC = 21;
 const VF_UID_GVVC = 349910;
@@ -62,6 +63,8 @@ $sql = "SELECT id, operation_id, entry_type, callsign, pilot_name, attendant_nam
 $stmt = $pdo->prepare($sql);
 $stmt->execute($params);
 $entries = $stmt->fetchAll(PDO::FETCH_ASSOC);
+$validationIssues=[];foreach($entries as $entry){$fields=flight_entry_missing_fields($entry);if($fields)$validationIssues[]=['entry_id'=>(int)$entry['id'],'fields'=>$fields];}
+if($validationIssues){http_response_code(422);header('Content-Type: application/json; charset=utf-8');echo json_encode(['ok'=>false,'error'=>'Export nicht möglich. Pflichtfelder fehlen oder sind ungültig.','validation_issues'=>$validationIssues],JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES);exit;}
 
 // Alle noch exportierbaren Einträge pro Operation gruppieren.
 $operations = [];

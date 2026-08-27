@@ -18,6 +18,7 @@
 require __DIR__ . '/db.php';
 require __DIR__ . '/helpers.php';
 require_once __DIR__ . '/api_authenticated_actor.php';
+require_once __DIR__ . '/flight_validation.php';
 
 $actor = api_authenticated_actor(['PILOT', 'DUTY_OFFICER', 'ADMIN']);
 $pdo = db();
@@ -46,24 +47,35 @@ if (!in_array($action, ['approve', 'request_correction', 'reset_pending'], true)
 
 $table = $tables[$entity];
 
+if ($action === 'approve' && $entity === 'accounting_entry') {
+    $check=$pdo->prepare('SELECT * FROM accounting_entries WHERE id=?');$check->execute([$id]);$entry=$check->fetch();
+    if(!$entry) json_response(['ok'=>false,'error'=>'Eintrag nicht gefunden.'],404);
+    $missing=flight_entry_missing_fields($entry);
+    if($missing) json_response(['ok'=>false,'error'=>'Freigabe nicht möglich. Pflichtfelder fehlen oder sind ungültig.','missing_fields'=>[['entry_id'=>$id,'entry_type'=>$entry['entry_type'],'callsign'=>$entry['callsign'],'fields'=>$missing]]],422);
+}
+if ($action === 'approve' && $entity === 'operation') {
+    $issues=flight_operation_validation($pdo,$id);
+    if($issues) json_response(['ok'=>false,'error'=>'Freigabe nicht möglich. Pflichtfelder fehlen oder sind ungültig.','missing_fields'=>$issues],422);
+}
+
 if ($action === 'approve') {
     $status = 'approved';
     $sql = "UPDATE {$table}
-            SET approval_status = ?, approved_by = ?, approved_at = NOW(), correction_note = NULL
+            SET approval_status = ?, approved_by = ?, approved_by_user_id = ?, approved_at = NOW(), correction_note = NULL
             WHERE id = ?";
-    $params = [$status, $user, $id];
+    $params = [$status, $user, $userId, $id];
 } elseif ($action === 'request_correction') {
     $status = 'correction_required';
 
     if ($entity === 'accounting_entry') {
         $sql = "UPDATE {$table}
-                SET approval_status = ?, approved_by = NULL, approved_at = NULL,
-                    correction_note = ?, exported_at = NULL, export_batch = NULL
+                SET approval_status = ?, approved_by = NULL, approved_by_user_id = NULL, approved_at = NULL,
+                    correction_note = ?, exported_at = NULL, vf_exported_at = NULL, export_batch = NULL
                 WHERE id = ?";
         $params = [$status, $note, $id];
     } else {
         $sql = "UPDATE {$table}
-                SET approval_status = ?, approved_by = NULL, approved_at = NULL,
+                SET approval_status = ?, approved_by = NULL, approved_by_user_id = NULL, approved_at = NULL,
                     correction_note = ?
                 WHERE id = ?";
         $params = [$status, $note, $id];
@@ -73,13 +85,13 @@ if ($action === 'approve') {
 
     if ($entity === 'accounting_entry') {
         $sql = "UPDATE {$table}
-                SET approval_status = ?, approved_by = NULL, approved_at = NULL,
-                    exported_at = NULL, export_batch = NULL
+                SET approval_status = ?, approved_by = NULL, approved_by_user_id = NULL, approved_at = NULL,
+                    exported_at = NULL, vf_exported_at = NULL, export_batch = NULL
                 WHERE id = ?";
         $params = [$status, $id];
     } else {
         $sql = "UPDATE {$table}
-                SET approval_status = ?, approved_by = NULL, approved_at = NULL
+                SET approval_status = ?, approved_by = NULL, approved_by_user_id = NULL, approved_at = NULL
                 WHERE id = ?";
         $params = [$status, $id];
     }

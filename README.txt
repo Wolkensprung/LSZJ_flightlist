@@ -1,9 +1,12 @@
-LSZJ Fachliche Pflichtfeldpruefung
+Korrektur der Seitenvalidierung in der Flugkorrektur.
 
-Ersetzt src/api_approve_flight_operation.php und src/api_export_status.php, ergänzt src/flight_validation.php. Danach optional Dashboard-Meldung patchen.
+Direkte Ersatzdateien:
+- public/flight_correction.php
+- src/api_save_operation_correction.php
 
-Installation: ZIP im Projektstamm entpacken. Danach: powershell -ExecutionPolicy Bypass -File .\tools\patch_dashboard_export_message.ps1
-
-Pflichtfelder glider_flight: Flugzeug, Start, Landung, Flugzeit >0, Segelflugpilot, Flugart, Abrechnung. Motorminuten optional.
-towplane_own: Flugzeug, Start, Landung, Flugzeit >0, Motorpilot, Flugart, Abrechnung.
-tow_charge: Flugzeug, Start, Schleppzeit >0, Schleppflugzeug, Schlepppilot, Flugart, Abrechnung.
+Behebt:
+- Standardwert charge_mode aktiviert nicht mehr fälschlich die leere Segelflugseite.
+- Nicht zusammenführen bei towplane_only prüft und speichert nur Motorflug.
+- Zusammenführung erzwingt beide Seiten.
+- Bestehende Motor-Flugart und Abrechnung bleiben bei Motor-only erhalten.
+- Alter user-Payload entfernt.

@@ -30,12 +30,12 @@ try{
         $pdo->prepare("UPDATE operations SET approval_status='approved',approved_by=?,approved_by_user_id=?,approved_at=NOW(),correction_note=NULL WHERE id=?")->execute([$actor['display_name'],$actor['id'],$operationId]);
         $status='approved';
     }elseif($action==='request_correction'){
-        $stmt=$pdo->prepare("UPDATE accounting_entries SET approval_status='correction_required',approved_by=NULL,approved_by_user_id=NULL,approved_at=NULL,correction_note=?,exported_at=NULL,export_batch=NULL WHERE operation_id=?");
+        $stmt=$pdo->prepare("UPDATE accounting_entries SET approval_status='correction_required',approved_by=NULL,approved_by_user_id=NULL,approved_at=NULL,correction_note=?,exported_at=NULL,vf_exported_at=NULL,export_batch=NULL WHERE operation_id=?");
         $stmt->execute([$note,$operationId]);
         $pdo->prepare("UPDATE operations SET approval_status='correction_required',approved_by=NULL,approved_by_user_id=NULL,approved_at=NULL,correction_note=? WHERE id=?")->execute([$note,$operationId]);
         $status='correction_required';
     }else{
-        $stmt=$pdo->prepare("UPDATE accounting_entries SET approval_status='pending',approved_by=NULL,approved_by_user_id=NULL,approved_at=NULL,exported_at=NULL,export_batch=NULL WHERE operation_id=?");
+        $stmt=$pdo->prepare("UPDATE accounting_entries SET approval_status='pending',approved_by=NULL,approved_by_user_id=NULL,approved_at=NULL,exported_at=NULL,vf_exported_at=NULL,export_batch=NULL WHERE operation_id=?");
         $stmt->execute([$operationId]);
         $pdo->prepare("UPDATE operations SET approval_status='pending',approved_by=NULL,approved_by_user_id=NULL,approved_at=NULL WHERE id=?")->execute([$operationId]);
         $status='pending';
