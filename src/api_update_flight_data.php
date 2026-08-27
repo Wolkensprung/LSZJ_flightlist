@@ -16,13 +16,15 @@
 
 require __DIR__ . '/db.php';
 require __DIR__ . '/helpers.php';
+require_once __DIR__ . '/api_authenticated_actor.php';
 
+$actor = api_authenticated_actor(['PILOT', 'DUTY_OFFICER', 'ADMIN']);
 $pdo = db();
 $input = json_decode(file_get_contents('php://input'), true) ?: $_POST;
 
 $entity = $input['entity'] ?? '';
 $id = (int)($input['id'] ?? 0);
-$user = trim($input['user'] ?? 'unknown');
+$user = $actor['display_name'];
 
 if (!$id || !in_array($entity, ['accounting_entry','tow_segment','operation'], true)) {
     json_response(['error' => 'entity oder id fehlt'], 400);
@@ -112,6 +114,13 @@ try {
     if ($sets) {
         // Jede Korrektur setzt den fachlichen Zustand wieder auf pending.
         $sets[] = "approval_status = 'pending'";
+
+        // Eine fachliche Änderung hebt eine vorhandene Freigabe auf.
+        if ($entity === 'accounting_entry' || $entity === 'operation') {
+            $sets[] = "approved_by = NULL";
+            $sets[] = "approved_by_user_id = NULL";
+            $sets[] = "approved_at = NULL";
+        }
 
         // Nur accounting_entries werden exportiert. Deshalb nur dort Exportstatus zuruecksetzen.
         if ($entity === 'accounting_entry') {

@@ -1,10 +1,12 @@
 <?php
 require __DIR__ . '/db.php';
 require __DIR__ . '/helpers.php';
+require_once __DIR__ . '/api_authenticated_actor.php';
+$actor = api_authenticated_actor(['PILOT', 'DUTY_OFFICER', 'ADMIN']);
 $pdo = db();
 $input = json_decode(file_get_contents('php://input'), true) ?: $_POST;
 $id = (int)($input['id'] ?? 0);
-$user = trim($input['user'] ?? 'unknown');
+$user = $actor['display_name'];
 $allowed = ['pilot_name','attendant_name','flight_minutes','tow_minutes','comment','tow_pilot_name','cost_center','vf_flight_type_id','plane_wkz','plane_designation'];
 if (!$id) json_response(['error' => 'id fehlt'], 400);
 $current = $pdo->prepare("SELECT * FROM accounting_entries WHERE id = ?");

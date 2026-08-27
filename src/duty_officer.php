@@ -30,9 +30,7 @@ function duty_officer_user_is_eligible(int $userId): bool
 function duty_officer_assert_eligible(int $userId): void
 {
     if (!duty_officer_user_is_eligible($userId)) {
-        throw new RuntimeException(
-            'Flugdienstleiter können nur aktive fliegende Mitglieder, Flugschüler oder GVVC-Mitglieder mit entsprechender Rolle sein.'
-        );
+        throw new RuntimeException('Flugdienstleiter können nur aktive fliegende Mitglieder, Flugschüler oder GVVC-Mitglieder mit entsprechender Rolle sein.');
     }
 }
 
@@ -67,17 +65,13 @@ function duty_officer_start(): int
 {
     $user = auth_require_login();
     duty_officer_assert_eligible((int)$user['id']);
-
     $pdo = db();
     duty_officer_acquire_lock($pdo);
     try {
-        $active = duty_officer_active();
-        if ($active !== null) {
+        if (duty_officer_active() !== null) {
             throw new RuntimeException('Es ist bereits ein Flugdienstleiter aktiv.');
         }
-        $stmt = $pdo->prepare(
-            'INSERT INTO duty_officer_shifts (user_id, start_time) VALUES (:user_id, NOW())'
-        );
+        $stmt = $pdo->prepare('INSERT INTO duty_officer_shifts (user_id, start_time) VALUES (:user_id, NOW())');
         $stmt->execute(['user_id' => (int)$user['id']]);
         return (int)$pdo->lastInsertId();
     } finally {
@@ -90,7 +84,6 @@ function duty_officer_handover(int $newUserId, ?string $reason = null): int
     $current = auth_require_login();
     duty_officer_assert_eligible((int)$current['id']);
     duty_officer_assert_eligible($newUserId);
-
     $pdo = db();
     duty_officer_acquire_lock($pdo);
     try {
@@ -98,15 +91,16 @@ function duty_officer_handover(int $newUserId, ?string $reason = null): int
         if ($active === null || (int)$active['user_id'] !== (int)$current['id']) {
             throw new RuntimeException('Nur der aktive Flugdienstleiter kann den Dienst übergeben.');
         }
-
         $pdo->beginTransaction();
         try {
             $close = $pdo->prepare(
                 'UPDATE duty_officer_shifts
-                 SET end_time = NOW(), handover_to = :new_user_id, handover_reason = :reason
+                 SET end_time = NOW(), ended_by = :ended_by,
+                     handover_to = :new_user_id, handover_reason = :reason
                  WHERE id = :id AND end_time IS NULL'
             );
             $close->execute([
+                'ended_by' => (int)$current['id'],
                 'new_user_id' => $newUserId,
                 'reason' => $reason,
                 'id' => $active['id'],
@@ -114,18 +108,13 @@ function duty_officer_handover(int $newUserId, ?string $reason = null): int
             if ($close->rowCount() !== 1) {
                 throw new RuntimeException('Die Flugdienstleiter-Schicht wurde zwischenzeitlich geändert.');
             }
-
-            $open = $pdo->prepare(
-                'INSERT INTO duty_officer_shifts (user_id, start_time) VALUES (:user_id, NOW())'
-            );
+            $open = $pdo->prepare('INSERT INTO duty_officer_shifts (user_id, start_time) VALUES (:user_id, NOW())');
             $open->execute(['user_id' => $newUserId]);
             $newShiftId = (int)$pdo->lastInsertId();
             $pdo->commit();
             return $newShiftId;
         } catch (Throwable $e) {
-            if ($pdo->inTransaction()) {
-                $pdo->rollBack();
-            }
+            if ($pdo->inTransaction()) $pdo->rollBack();
             throw $e;
         }
     } finally {
@@ -137,7 +126,6 @@ function duty_officer_end(?string $reason = null): void
 {
     $current = auth_require_login();
     duty_officer_assert_eligible((int)$current['id']);
-
     $pdo = db();
     duty_officer_acquire_lock($pdo);
     try {
@@ -147,10 +135,65 @@ function duty_officer_end(?string $reason = null): void
         }
         $stmt = $pdo->prepare(
             'UPDATE duty_officer_shifts
-             SET end_time = NOW(), handover_reason = :reason
+             SET end_time = NOW(), ended_by = :ended_by, handover_reason = :reason
              WHERE id = :id AND end_time IS NULL'
         );
-        $stmt->execute(['reason' => $reason, 'id' => $active['id']]);
+        $stmt->execute(['ended_by' => (int)$current['id'], 'reason' => $reason, 'id' => $active['id']]);
+    } finally {
+        duty_officer_release_lock($pdo);
+    }
+}
+
+function duty_officer_admin_end(string $reason): void
+{
+    $admin = auth_require_login();
+    if (!has_role('ADMIN')) {
+        throw new RuntimeException('Administratorrolle erforderlich.');
+    }
+    $reason = trim($reason);
+    if ($reason === '') {
+        throw new RuntimeException('Für die administrative Beendigung ist eine Begründung erforderlich.');
+    }
+    $pdo = db();
+    duty_officer_acquire_lock($pdo);
+    try {
+        $active = duty_officer_active();
+        if ($active === null) {
+            throw new RuntimeException('Es ist kein Flugdienstleiter aktiv.');
+        }
+        $stmt = $pdo->prepare(
+            "UPDATE duty_officer_shifts
+             SET end_time = NOW(), ended_by = :ended_by,
+                 handover_reason = CONCAT('Administrativ beendet: ', :reason)
+             WHERE id = :id AND end_time IS NULL"
+        );
+        $stmt->execute([
+            'ended_by' => (int)$admin['id'],
+            'reason' => $reason,
+            'id' => $active['id'],
+        ]);
+        if ($stmt->rowCount() !== 1) {
+            throw new RuntimeException('Die Flugdienstleiter-Schicht wurde zwischenzeitlich geändert.');
+        }
+    } finally {
+        duty_officer_release_lock($pdo);
+    }
+}
+
+function duty_officer_close_stale_at_midnight(): int
+{
+    $pdo = db();
+    duty_officer_acquire_lock($pdo);
+    try {
+        $stmt = $pdo->prepare(
+            "UPDATE duty_officer_shifts
+             SET end_time = CURDATE(), ended_by = NULL,
+                 handover_reason = 'Automatisch beendet: Tageswechsel um Mitternacht'
+             WHERE end_time IS NULL
+               AND start_time < CURDATE()"
+        );
+        $stmt->execute();
+        return $stmt->rowCount();
     } finally {
         duty_officer_release_lock($pdo);
     }

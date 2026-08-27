@@ -8,7 +8,7 @@ $currentUser = lszj_require_page_login();
 <link rel="stylesheet" href="master_data_autocomplete.css">
 <link rel="stylesheet" href="external_pilot_form.css">
 </head><body>
-<h1>Flug manuell erfassen</h1><div class="nav"><a href="#" onclick="nav('dashboard.php');return false;">Dashboard</a><a href="#" onclick="nav('flight_approvals.php');return false;">Flugfreigaben</a><a href="#" onclick="nav('manual_flight.php');return false;">+ Flug manuell erfassen</a><a href="duty_officer.php">Flugdienstleiter</a></div>
+<h1>Flug manuell erfassen</h1><div class="nav"><a href="#" onclick="nav('dashboard.php');return false;">Dashboard</a><a href="#" onclick="nav('flight_approvals.php');return false;">Flugfreigaben</a><a href="#" onclick="nav('manual_flight.php');return false;">+ Flug manuell erfassen</a><a href="duty_officer.php">Flugdienstleiter</a><?php if (has_role('ADMIN')): ?><a href="user_admin.php">Benutzerverwaltung</a><?php endif; ?></div>
 <div class="card"><div class="row"><label>Datum <input id="date" type="date"></label><label>Status <select id="status"><option value="pending">pending</option><option value="all">all</option></select></label><label>Benutzer <input id="user" value="demo"></label></div></div>
 <div class="tabs"><button id="b_glider" onclick="showMode('glider')">Segelflug</button><button id="b_tow" onclick="showMode('tow')">Motorflug</button><button id="b_pair" onclick="showMode('pair')">Segelflug + Motorflug</button><button id="b_attachTow" onclick="showMode('attachTow')">Schlepp zu Segelflug</button><button id="b_attachGlider" onclick="showMode('attachGlider')">Segelflug zu Schlepp</button></div><div id="content"></div>
 <script>
