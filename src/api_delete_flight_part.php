@@ -1,6 +1,9 @@
 <?php
 require __DIR__ . '/db.php';
 require __DIR__ . '/helpers.php';
+require_once __DIR__ . '/api_authenticated_actor.php';
+$actor = api_authenticated_actor(['DUTY_OFFICER', 'ADMIN']);
+
 require __DIR__ . '/lszj_correction_lib.php';
 $pdo=db(); $input=jinput();
 $operationId=(int)qv($input,'operation_id',0); $part=qv($input,'part');

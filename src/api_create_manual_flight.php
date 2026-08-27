@@ -9,7 +9,10 @@
 
 require __DIR__ . '/db.php';
 require __DIR__ . '/helpers.php';
+require_once __DIR__ . '/motor_minutes.php';
+require_once __DIR__ . '/api_authenticated_actor.php';
 
+$actor = api_authenticated_actor(['PILOT', 'DUTY_OFFICER', 'ADMIN']);
 $pdo = db();
 $input = json_decode(file_get_contents('php://input'), true) ?: $_POST;
 $mode = $input['mode'] ?? '';
@@ -205,6 +208,7 @@ function glider_entry(int $op, string $date, array $input, string $glider, $take
         'arrival_time' => dtv($date, $landing),
         'arrival_location' => v($input, 'arrival_location', 'LSZJ'),
         'flight_minutes' => mins_v($date, $takeoff, $landing),
+        'motor_minutes' => motor_minutes_normalize(v($input, 'motor_minutes')),
         'landing_count' => 1,
         'start_type' => $startType,
         'charge_mode' => (int)v($input, 'charge_mode', 2),

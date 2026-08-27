@@ -1,25 +1,9 @@
-LSZJ API Auth Welle 2
+LSZJ Fachliche Pflichtfeldpruefung
 
-Ersetzt:
-- src/api_approve_flight_operation.php
-- src/api_update_flight_data.php
-- public/flight_approvals.php
+Ersetzt src/api_approve_flight_operation.php und src/api_export_status.php, ergänzt src/flight_validation.php. Danach optional Dashboard-Meldung patchen.
 
-Migration:
-- sql/021_api_auth_wave2.sql
+Installation: ZIP im Projektstamm entpacken. Danach: powershell -ExecutionPolicy Bypass -File .\tools\patch_dashboard_export_message.ps1
 
-Voraussetzung:
-- src/api_authenticated_actor.php aus Welle 1
-
-Installation:
-1. Datenbank und drei Dateien sichern.
-2. ZIP im Projektstamm entpacken.
-3. Migration ausfuehren:
-   mariadb -u lszj -p lszj_flightlist -e "source sql/021_api_auth_wave2.sql"
-4. Ctrl+F5.
-
-Wirkung:
-- Freigaben setzen approved_by und approved_by_user_id aus auth_user().
-- Korrektur und Reset leeren beide Freigabeidentitaeten.
-- Änderungen protokollieren changed_by aus auth_user().
-- user-Feld, URL-Parameter und Payloads wurden aus flight_approvals.php entfernt.
+Pflichtfelder glider_flight: Flugzeug, Start, Landung, Flugzeit >0, Segelflugpilot, Flugart, Abrechnung. Motorminuten optional.
+towplane_own: Flugzeug, Start, Landung, Flugzeit >0, Motorpilot, Flugart, Abrechnung.
+tow_charge: Flugzeug, Start, Schleppzeit >0, Schleppflugzeug, Schlepppilot, Flugart, Abrechnung.

@@ -2,6 +2,7 @@
 declare(strict_types=1);
 
 require __DIR__ . '/db.php';
+require_once __DIR__ . '/motor_minutes.php';
 
 const VF_FLIGHT_TYPE_GVVC = 21;
 const VF_UID_GVVC = 349910;
@@ -52,7 +53,7 @@ $header = [
 
 $sql = "SELECT id, operation_id, entry_type, callsign, pilot_name, attendant_name,
                departure_time, departure_location, arrival_time, arrival_location,
-               flight_minutes, landing_count, start_type, charge_mode, invoiced, comment,
+               flight_minutes, motor_minutes, landing_count, start_type, charge_mode, invoiced, comment,
                tow_height_m, tow_minutes, tow_callsign, tow_pilot_name,
                tow_arrival_location, vf_flight_type_id, km, plane_wkz, plane_designation
         FROM accounting_entries
@@ -157,6 +158,11 @@ $writeRow = static function ($out, array $header, array $entry, ?array $towEntry
         ?? (($type === 'tow_charge' || $type === 'towplane_own') ? ($entry['tow_minutes'] ?? '') : '');
     $row['landingcount'] = $entry['landing_count'] ?? 1;
     $row['starttype'] = $entry['start_type'] ?? '';
+    if ($type === 'glider_flight') {
+        $motorTimes = motor_minutes_export_times($entry['motor_minutes'] ?? null);
+        $row['motorstart'] = $motorTimes['motor_start'];
+        $row['motorend'] = $motorTimes['motor_end'];
+    }
     $row['chargemode'] = $entry['charge_mode'] ?? 2;
     $row['invoiced'] = $entry['invoiced'] ?? 0;
     $row['comment'] = (string)($entry['comment'] ?? '');

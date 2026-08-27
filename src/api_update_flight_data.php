@@ -38,6 +38,7 @@ $config = [
             'attendant_name',
             'tow_pilot_name',
             'flight_minutes',
+            'motor_minutes',
             'tow_minutes',
             'charge_mode',
             'comment',
