@@ -1,2 +1,0 @@
-<?php
-require __DIR__ . '/db.php';require __DIR__ . '/helpers.php';$lang=$_GET['lang']??'de';if(!in_array($lang,['de','fr'],true))$lang='de';try{$pdo=db();$stmt=$pdo->prepare("SELECT translation_key, translation_text FROM i18n_translations WHERE lang=?");$stmt->execute([$lang]);$t=[];foreach($stmt->fetchAll() as $r)$t[$r['translation_key']]=$r['translation_text'];json_response(['ok'=>true,'lang'=>$lang,'translations'=>$t]);}catch(Throwable $e){json_response(['ok'=>false,'lang'=>$lang,'translations'=>[],'error'=>$e->getMessage()],500);}

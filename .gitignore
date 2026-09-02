@@ -38,3 +38,4 @@ public+src.txt
 
 # lokale Archive
 _local_archive_*/
+/deployment_endpoints.txt

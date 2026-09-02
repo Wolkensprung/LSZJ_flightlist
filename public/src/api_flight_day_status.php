@@ -1,2 +1,0 @@
-<?php
-declare(strict_types=1);require_once __DIR__.'/api_authenticated_actor.php';require_once __DIR__.'/flight_day.php';api_authenticated_actor(['PILOT','DUTY_OFFICER','ADMIN']);try{$date=(string)($_GET['date']??date('Y-m-d'));header('Content-Type: application/json; charset=utf-8');echo json_encode(flight_day_status(db(),$date),JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES);}catch(Throwable $e){json_response(['ok'=>false,'error'=>$e->getMessage()],400);}

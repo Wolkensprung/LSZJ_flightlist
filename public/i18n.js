@@ -1,6 +1,6 @@
 /* LSZJ i18n hotfix 02
    Zweck: stabile DE/FR Umschaltung ohne fehleranfällige RegExp-Escapes.
-   Lädt Übersetzungen aus ../src/api_i18n.php und nutzt Fallback, falls die DB/API nicht verfügbar ist.
+   Lädt Übersetzungen aus api_i18n.php und nutzt Fallback, falls die DB/API nicht verfügbar ist.
 */
 (function(){
   const LANG_KEY = 'lszj_lang';
@@ -107,7 +107,7 @@
     const lang = currentLang();
     table = fallbackTable(lang);
     try {
-      const response = await fetch('../src/api_i18n.php?lang=' + encodeURIComponent(lang) + '&_=' + Date.now());
+      const response = await fetch('api_i18n.php?lang=' + encodeURIComponent(lang) + '&_=' + Date.now());
       const payload = await response.json();
       if(payload && payload.ok && payload.translations){
         table = Object.assign(table, payload.translations);

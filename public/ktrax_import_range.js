@@ -11,7 +11,7 @@ async function importKTraxRange(){
   const btns = Array.from(document.querySelectorAll('button')).filter(b => (b.textContent||'').trim() === 'kTrax-Import');
   btns.forEach(b => { b.disabled = true; b.dataset.oldText = b.textContent; b.textContent = 'kTrax-Import läuft...'; });
   try {
-    const url = '../src/api_import_ktrax_range.php?from=' + encodeURIComponent(from) + '&to=' + encodeURIComponent(to);
+    const url = 'api_import_ktrax_range.php?from=' + encodeURIComponent(from) + '&to=' + encodeURIComponent(to);
     const r = await fetch(url, {method:'POST'});
     const j = await r.json();
     if(!j.ok){ alert(j.error || 'kTrax-Import fehlgeschlagen.'); return; }

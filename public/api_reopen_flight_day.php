@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-$implementation = dirname(__DIR__) . '/src/api_search_pilots.php';
+$implementation = dirname(__DIR__) . '/src/api_reopen_flight_day.php';
 
 if (!is_file($implementation)) {
     http_response_code(500);

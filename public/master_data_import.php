@@ -1,8 +1,9 @@
 <?php
+declare(strict_types=1);
+
 require_once __DIR__ . '/../src/page_security.php';
 $currentUser = lszj_require_page_role('ADMIN');
 
-declare(strict_types=1);
 
 require __DIR__ . '/../src/db.php';
 require __DIR__ . '/../src/master_data_bootstrap.php';
