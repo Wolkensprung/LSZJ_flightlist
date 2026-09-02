@@ -16,16 +16,18 @@ _deploy_patch/
 *.bak
 *.bak-*
 
-# Dumps und lokale Exporte
+# Lokale Datenbank-Dumps
 /schema.sql
 /schema2.sql
 /seed_data.sql
-/*_Hostpoint_*.sql
+/full_dump.sql
+/*Hostpoint*.sql
 /backup_*.sql
+/sgbielc_*.sql
 
-# Versionierte Migrationen ausdrücklich zulassen
-!/database/*.sql
+# Echte Migrationen bleiben versionierbar
 !/sql/*.sql
+!/database/*.sql
 
 # temporäre Arbeitsdateien
 *.zip
