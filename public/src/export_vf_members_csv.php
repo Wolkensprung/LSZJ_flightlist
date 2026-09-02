@@ -25,11 +25,6 @@ $stmt = $pdo->query(
 );
 $contacts = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-if ($contacts === []) {
-    header('Location: ../public/vf_external_contacts.php?message=' . rawurlencode('Keine ausstehenden Kontakte vorhanden.'));
-    exit;
-}
-
 header('Content-Type: text/csv; charset=utf-8');
 header('Content-Disposition: attachment; filename="' . $filename . '"');
 header('Cache-Control: no-store, no-cache, must-revalidate');

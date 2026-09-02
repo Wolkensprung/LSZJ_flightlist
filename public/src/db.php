@@ -2,8 +2,8 @@
 declare(strict_types=1);
 
 /**
- * Datenbankzugriff fuer die lokale Entwicklungsumgebung und fuer /src auf Hostpoint.
- * Erwartet config.php genau eine Ebene oberhalb von src/.
+ * TEMPORAERE Hostpoint-TEST-Variante fuer /public/src.
+ * Erwartet config.php zwei Ebenen oberhalb von public/src/ und damit ausserhalb des Webroots.
  */
 function db(): PDO
 {
@@ -13,7 +13,7 @@ function db(): PDO
         return $pdo;
     }
 
-    $configFile = dirname(__DIR__) . '/config.php';
+    $configFile = dirname(__DIR__, 2) . '/config.php';
     if (!is_file($configFile)) {
         throw new RuntimeException('config.php fehlt: ' . $configFile);
     }
@@ -47,7 +47,7 @@ function app_config(): array
         return $config;
     }
 
-    $configFile = dirname(__DIR__) . '/config.php';
+    $configFile = dirname(__DIR__, 2) . '/config.php';
     if (!is_file($configFile)) {
         throw new RuntimeException('config.php fehlt: ' . $configFile);
     }

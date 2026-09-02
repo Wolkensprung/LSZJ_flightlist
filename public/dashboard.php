@@ -33,7 +33,7 @@ $activeDutyOfficer = duty_officer_active();
   </div>
 </div>
 <h1>LSZJ Dashboard</h1>
-<div class="nav"><a href="#" onclick="nav('dashboard.php');return false;">Dashboard</a><a href="#" onclick="nav('flight_approvals.php');return false;">Flugfreigaben</a><a href="#" onclick="nav('manual_flight.php');return false;">+ Flug manuell erfassen</a><a href="duty_officer.php">Flugdienstleiter</a><?php if (has_role('ADMIN')): ?><a href="user_admin.php">Benutzerverwaltung</a><?php endif; ?></div>
+<div class="nav"><a href="#" onclick="nav('dashboard.php');return false;">Dashboard</a><a href="#" onclick="nav('flight_approvals.php');return false;">Flugfreigaben</a><a href="#" onclick="nav('manual_flight.php');return false;">+ Flug manuell erfassen</a><a href="duty_officer.php">Flugdienstleiter</a><?php if (has_role('ADMIN')): ?><a href="user_admin.php">Benutzerverwaltung</a><a href="vf_external_contacts.php">VF-Kontakte</a><?php endif; ?></div>
 <div class="top"><label>Von <input id="from" type="date"></label><label>Bis <input id="to" type="date"></label><label>Status <select id="status"><option value="pending">pending</option><option value="correction_required">correction_required</option><option value="approved">approved</option><option value="all">all</option></select></label><button onclick="loadData()">Laden</button><button class="secondary" onclick="importKTraxRange()">kTrax-Import</button><button class="quick" onclick="setToday()">Heute</button><button class="quick" onclick="setYesterday()">Gestern</button><button class="quick" onclick="setLast7()">Letzte 7 Tage</button></div>
 <div id="rangeLabel" class="card"></div>
 <div id="metrics" class="grid"></div>

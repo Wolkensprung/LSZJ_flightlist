@@ -1,4 +1,5 @@
 .env
+config.php
 
 /vendor
 /node_modules
@@ -7,11 +8,33 @@ phpinfo.php
 test_db.php
 
 *.log
+
+# Backups
 backups/
+_archive/
+_deploy_patch/
+*.bak
 *.bak-*
-backup_*.sql
-.env
-config.php
-backups/
-*.bak-*
-backup_*.sql
+
+# Dumps und lokale Exporte
+/schema.sql
+/schema2.sql
+/seed_data.sql
+/*_Hostpoint_*.sql
+/backup_*.sql
+
+# Versionierte Migrationen ausdrücklich zulassen
+!/database/*.sql
+!/sql/*.sql
+
+# temporäre Arbeitsdateien
+*.zip
+src.txt
+src_php_files.txt
+public_src.txt
+public_src_files.txt
+publi+src.txt
+public+src.txt
+
+# lokale Archive
+_local_archive_*/

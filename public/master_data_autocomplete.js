@@ -2,7 +2,7 @@
   'use strict';
 
   const pageBase = new URL('.', window.location.href);
-  const apiUrl = name => new URL('../src/' + name, pageBase).toString();
+  const apiUrl = name => new URL(name, pageBase).toString();
   let showAllPilots = false;
 
   function fieldType(input) {

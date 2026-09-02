@@ -58,7 +58,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
          VALUES (?,?,?,?,?,1)
          ON DUPLICATE KEY UPDATE
            last_name=VALUES(last_name), first_name=VALUES(first_name), name=VALUES(name),
-           phone=VALUES(phone), is_active=1, vf_exported_at=NULL, vf_linked_at=NULL, vf_user_no=NULL, id=LAST_INSERT_ID(id)'
+           phone=VALUES(phone), is_active=1, id=LAST_INSERT_ID(id)'
     );
     $stmt->execute([$lastName,$firstName,$name,$email,$phone]);
 
