@@ -5,8 +5,8 @@ require_once __DIR__ . '/../src/page_security.php';
 $currentUser = lszj_require_page_role('ADMIN');
 
 
-require __DIR__ . '/../src/db.php';
-require __DIR__ . '/../src/master_data_bootstrap.php';
+require_once __DIR__ . '/../src/db.php';
+require_once __DIR__ . '/../src/master_data_bootstrap.php';
 
 use LSZJ\MasterData\VereinsfliegerCsvImporter;
 
