@@ -1,0 +1,4 @@
+Im ADMIN-Bereich der Navigation ergänzen:
+<a href="vf_person_sync.php">VF-Personenimport</a>
+
+Die Seite kann auch direkt über /public/vf_person_sync.php aufgerufen werden. Das Paket ersetzt dashboard.php bewusst nicht, um Regressionen zu vermeiden.

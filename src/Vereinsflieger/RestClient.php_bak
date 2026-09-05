@@ -1,0 +1,139 @@
+<?php
+declare(strict_types=1);
+namespace LSZJ\Vereinsflieger;
+
+use RuntimeException;
+
+final class RestClient
+{
+    private string $accessToken = '';
+
+    public function __construct(private array $config)
+    {
+        foreach (['base_url','username','password','appkey'] as $key) {
+            if (trim((string)($config[$key] ?? '')) === '') {
+                throw new RuntimeException("Vereinsflieger-Konfiguration fehlt: {$key}");
+            }
+        }
+        if (!extension_loaded('curl')) {
+            throw new RuntimeException('PHP-cURL ist nicht installiert.');
+        }
+    }
+
+    /** @return list<array<string,mixed>> */
+    public function listUsers(): array
+    {
+        try {
+            $this->accessToken = $this->extractToken($this->request('GET', 'auth/accesstoken'));
+            $password = (string)$this->config['password'];
+            $passwordLatin1 = function_exists('iconv') ? iconv('UTF-8', 'ISO-8859-1//TRANSLIT', $password) : $password;
+            if ($passwordLatin1 === false) {
+                throw new RuntimeException('VF-Passwort konnte nicht nach ISO-8859-1 konvertiert werden.');
+            }
+            $signin = [
+                'accesstoken' => $this->accessToken,
+                'username' => (string)$this->config['username'],
+                'password' => md5($passwordLatin1),
+                'appkey' => (string)$this->config['appkey'],
+            ];
+            foreach (['cid','auth_secret'] as $optional) {
+                if (trim((string)($this->config[$optional] ?? '')) !== '') {
+                    $signin[$optional] = (string)$this->config[$optional];
+                }
+            }
+            $this->request('POST', 'auth/signin', $signin);
+            return $this->extractRows($this->request('POST', 'user/list', ['accesstoken'=>$this->accessToken]));
+        } finally {
+            if ($this->accessToken !== '') {
+                try {
+                    $this->request('DELETE', 'auth/signout/' . rawurlencode($this->accessToken));
+                } catch (\Throwable $e) {
+                    error_log('VF signout failed: ' . $e->getMessage());
+                }
+            }
+        }
+    }
+
+    private function request(string $method, string $path, array $fields = []): array
+    {
+        $url = rtrim((string)$this->config['base_url'], '/') . '/' . ltrim($path, '/');
+        if ($method === 'GET' && $fields !== []) {
+            $url .= '?' . http_build_query($fields, '', '&', PHP_QUERY_RFC3986);
+        }
+        $ch = curl_init($url);
+        if ($ch === false) throw new RuntimeException('cURL konnte nicht initialisiert werden.');
+        $options = [
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_CONNECTTIMEOUT => (int)($this->config['connect_timeout'] ?? 10),
+            CURLOPT_TIMEOUT => (int)($this->config['timeout'] ?? 30),
+            CURLOPT_SSL_VERIFYPEER => true,
+            CURLOPT_SSL_VERIFYHOST => 2,
+            CURLOPT_HTTPHEADER => ['Accept: application/json'],
+        ];
+        if ($method === 'POST') {
+            $options[CURLOPT_POST] = true;
+            $options[CURLOPT_POSTFIELDS] = http_build_query($fields, '', '&', PHP_QUERY_RFC3986);
+            $options[CURLOPT_HTTPHEADER][] = 'Content-Type: application/x-www-form-urlencoded';
+        } elseif ($method === 'DELETE') {
+            $options[CURLOPT_CUSTOMREQUEST] = 'DELETE';
+        }
+        curl_setopt_array($ch, $options);
+        $body = curl_exec($ch);
+        $errno = curl_errno($ch);
+        $error = curl_error($ch);
+        $status = (int)curl_getinfo($ch, CURLINFO_RESPONSE_CODE);
+        curl_close($ch);
+        if ($body === false || $errno !== 0) throw new RuntimeException('VF-Verbindungsfehler: ' . $error);
+       
+       
+        //if ($status < 200 || $status >= 300) throw new RuntimeException("VF antwortet mit HTTP {$status}.");
+       
+ if ($status < 200 || $status >= 300) {
+    $detail = trim(strip_tags((string)$body));
+    $detail = preg_replace('/\s+/', ' ', $detail) ?? '';
+    $detail = mb_substr($detail, 0, 300);
+
+    $message = sprintf(
+        'VF antwortet bei %s %s mit HTTP %d.',
+        $method,
+        $path,
+        $status
+    );
+
+    if ($detail !== '') {
+        $message .= ' VF-Antwort: ' . $detail;
+    }
+
+    throw new RuntimeException($message);
+}
+       
+        $decoded = json_decode((string)$body, true);
+        if (!is_array($decoded)) throw new RuntimeException('VF-Antwort ist kein gültiges JSON.');
+        $message = $decoded['error'] ?? $decoded['errormessage'] ?? null;
+        if ($message) throw new RuntimeException('VF-Fehler: ' . (string)$message);
+        return $decoded;
+    }
+
+    private function extractToken(array $payload): string
+    {
+        foreach (['accesstoken','access_token','token'] as $key) {
+            $value = trim((string)($payload[$key] ?? ($payload['data'][$key] ?? '')));
+            if ($value !== '') return $value;
+        }
+        throw new RuntimeException('VF-Antwort enthält kein Access-Token.');
+    }
+
+    /** @return list<array<string,mixed>> */
+    private function extractRows(array $payload): array
+    {
+        foreach ([$payload, $payload['data'] ?? null, $payload['users'] ?? null, $payload['response'] ?? null] as $candidate) {
+            if (!is_array($candidate)) continue;
+            if ($candidate === []) return [];
+            if (array_is_list($candidate) && is_array($candidate[0] ?? null)) return $candidate;
+            foreach (['users','items','data'] as $key) {
+                if (isset($candidate[$key]) && is_array($candidate[$key]) && array_is_list($candidate[$key])) return $candidate[$key];
+            }
+        }
+        throw new RuntimeException('VF-Personenliste hat ein unbekanntes Antwortformat.');
+    }
+}
