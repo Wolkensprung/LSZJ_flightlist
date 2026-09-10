@@ -1,6 +1,10 @@
 <?php
 declare(strict_types=1);
 
+header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
+header('Pragma: no-cache');
+header('Expires: 0');
+
 require_once __DIR__ . '/../src/auth.php';
 require_once __DIR__ . '/../src/permissions.php';
 
@@ -16,290 +20,166 @@ require_role('ADMIN');
     <link rel="stylesheet" href="app.css">
 </head>
 <body>
-
 <div class="card">
     <div class="row">
-        <div>
-            <strong>Angemeldet:</strong>
-            <?= htmlspecialchars((string)$user['display_name'], ENT_QUOTES, 'UTF-8') ?>
-        </div>
-
-        <div>
-            <a class="button secondary" href="dashboard.php">Dashboard</a>
-        </div>
-
-        <div>
-            <a class="button secondary" href="master_data_import.php">
-                CSV-Stammdatenimport
-            </a>
-        </div>
-
-        <div>
-            <a class="button secondary" href="logout.php">Logout</a>
-        </div>
+        <strong>Angemeldet: <?= htmlspecialchars((string)$user['display_name'], ENT_QUOTES, 'UTF-8') ?></strong>
+        <a class="button secondary" href="dashboard.php">Dashboard</a>
+        <a class="button secondary" href="master_data_import.php">CSV-Stammdatenimport</a>
+        <a class="button secondary" href="logout.php">Logout</a>
     </div>
 </div>
 
 <h1>Personen aus Vereinsflieger</h1>
-
 <p class="info">
-    Die Vorschau liest die Personenliste aus Vereinsflieger, ändert aber keine Daten.
-    Erst der bestätigte Import schreibt nach <code>pilots_master</code>.
+    Sicherer Abgleich über VF-Benutzernummer und, falls diese geändert hat,
+    über die eindeutige Mitgliedsnummer. Nur lokal vorhandene Personen bleiben
+    unverändert. Identitätskonflikte sperren den Import.
 </p>
 
 <div class="card">
     <div class="row">
-        <button id="previewButton" type="button">
-            Vorschau laden
-        </button>
-
-        <button id="importButton" class="ok" type="button" disabled>
-            Bestätigt importieren
-        </button>
+        <button id="previewButton" type="button">Vorschau laden</button>
+        <button id="importButton" class="ok" type="button" disabled>Sicher importieren</button>
     </div>
-
     <p>
         <label>
-            <input id="completeCheckbox" type="checkbox">
-            Ich bestätige, dass die angezeigte VF-Liste vollständig ist.
-            Fehlende bestehende Personen dürfen deaktiviert werden.
+            <input id="confirmCheckbox" type="checkbox">
+            Ich habe neue, geänderte und erkannte UID-Wechsel geprüft.
         </label>
     </p>
 </div>
 
-<div id="result" class="card">
-    Noch keine Vorschau geladen.
-</div>
+<div id="result" class="card">Noch keine Vorschau geladen.</div>
 
 <script>
 'use strict';
 
-const csrfToken = <?= json_encode(
-    csrf_token(),
-    JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE
-) ?>;
-
+const VERSION = '2026-09-09-uid-matching-v1';
+const csrfToken = <?= json_encode(csrf_token(), JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) ?>;
 const previewButton = document.getElementById('previewButton');
 const importButton = document.getElementById('importButton');
-const completeCheckbox = document.getElementById('completeCheckbox');
+const confirmCheckbox = document.getElementById('confirmCheckbox');
 const resultBox = document.getElementById('result');
+let previewValid = false;
+let importAllowed = false;
+let busy = false;
 
-let previewIsValid = false;
+const labels = {
+    vf_member_no: 'Mitgliedsnummer', display_name: 'Name', email: 'E-Mail',
+    mobile: 'Mobil', membership_status: 'Mitgliedsstatus',
+    cost_level: 'Kostenstufe', is_active: 'Aktivstatus'
+};
 
-function escapeHtml(value) {
+function esc(value) {
     return String(value ?? '').replace(/[&<>"']/g, character => ({
-        '&': '&amp;',
-        '<': '&lt;',
-        '>': '&gt;',
-        '"': '&quot;',
-        "'": '&#039;'
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;'
     })[character]);
 }
 
-function updateImportButton() {
-    importButton.disabled = !(
-        previewIsValid && completeCheckbox.checked
-    );
+function updateButtons() {
+    previewButton.disabled = busy;
+    importButton.disabled = busy || !previewValid || !importAllowed || !confirmCheckbox.checked;
 }
 
-function setBusy(isBusy) {
-    previewButton.disabled = isBusy;
-
-    if (isBusy) {
-        importButton.disabled = true;
-    } else {
-        updateImportButton();
-    }
-}
-
-async function parseJsonResponse(response) {
-    const responseText = await response.text();
-
-    try {
-        return JSON.parse(responseText);
-    } catch (error) {
-        const excerpt = responseText.slice(0, 180);
-
-        throw new Error(
-            `API liefert kein JSON (HTTP ${response.status}). ` +
-            `Antwortanfang: ${excerpt}`
-        );
-    }
-}
-
-function renderWarnings(warnings) {
-    if (!Array.isArray(warnings) || warnings.length === 0) {
-        return '';
-    }
-
-    return `
-        <div class="warnbox">
-            <strong>Hinweise:</strong><br>
-            ${warnings.map(escapeHtml).join('<br>')}
-        </div>
-    `;
-}
-
-function renderSample(sample) {
-    if (!Array.isArray(sample) || sample.length === 0) {
-        return '<p>Keine Stichprobe verfügbar.</p>';
-    }
-
-    const rows = sample.map(person => `
-        <tr>
-            <td>${escapeHtml(person.Benutzernummer)}</td>
-            <td>${escapeHtml(person.MitgliedsNr)}</td>
-            <td>${escapeHtml(person.Name)}</td>
-            <td>${escapeHtml(person.Mitgliedsstatus)}</td>
-            <td>${escapeHtml(person.Kostenstufe)}</td>
-        </tr>
-    `).join('');
-
-    return `
-        <h3>Stichprobe</h3>
-        <table>
-            <thead>
-                <tr>
-                    <th>VF-Nr.</th>
-                    <th>Mitgliedsnr.</th>
-                    <th>Name</th>
-                    <th>Mitgliedsstatus</th>
-                    <th>Kostenstufe</th>
-                </tr>
-            </thead>
-            <tbody>
-                ${rows}
-            </tbody>
-        </table>
-    `;
-}
-
-function renderPreview(data) {
-    resultBox.innerHTML = `
-        <h2>Vorschau</h2>
-
-        <div class="grid">
-            <div class="metric">
-                <b>${escapeHtml(data.rows_received)}</b>
-                <span>empfangen</span>
-            </div>
-
-            <div class="metric">
-                <b>${escapeHtml(data.new)}</b>
-                <span>neu</span>
-            </div>
-
-            <div class="metric">
-                <b>${escapeHtml(data.changed)}</b>
-                <span>geändert oder reaktiviert</span>
-            </div>
-
-            <div class="metric">
-                <b>${escapeHtml(data.unchanged)}</b>
-                <span>unverändert</span>
-            </div>
-
-            <div class="metric">
-                <b>${escapeHtml(data.would_deactivate)}</b>
-                <span>würden deaktiviert</span>
-            </div>
-        </div>
-
-        ${renderWarnings(data.adapter_warnings)}
-        ${renderSample(data.sample)}
-    `;
-}
-
-function renderImportResult(data) {
-    const importResult = data.result ?? {};
-
-    resultBox.innerHTML = `
-        <div class="okbox">
-            <h2>Import erfolgreich</h2>
-            <p>
-                ${escapeHtml(importResult.rows_imported)} importiert,
-                ${escapeHtml(importResult.rows_skipped)} übersprungen.
-            </p>
-        </div>
-
-        ${renderWarnings(importResult.adapter_warnings)}
-    `;
-}
-
-function renderError(error) {
-    resultBox.innerHTML = `
-        <div class="warnbox">
-            ${escapeHtml(error.message)}
-        </div>
-    `;
-}
-
-async function callSyncApi(action) {
-    const response = await fetch('api_vf_person_sync.php', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        credentials: 'same-origin',
+async function callApi(action) {
+    const response = await fetch(`api_vf_person_sync.php?v=${VERSION}`, {
+        method: 'POST', cache: 'no-store', credentials: 'same-origin',
+        headers: {'Content-Type': 'application/json', 'Cache-Control': 'no-cache'},
         body: JSON.stringify({
-            action: action,
-            confirm_complete: completeCheckbox.checked,
-            csrf_token: csrfToken
+            action,
+            confirm_safe_import: action === 'import' && confirmCheckbox.checked,
+            csrf_token: csrfToken,
+            page_version: VERSION
         })
     });
-
-    const data = await parseJsonResponse(response);
-
-    if (!response.ok || !data.ok) {
-        throw new Error(data.error || `HTTP ${response.status}`);
-    }
-
+    const text = (await response.text()).replace(/^\uFEFF/, '').trim();
+    let data;
+    try { data = JSON.parse(text); }
+    catch (error) { throw new Error(`API liefert kein JSON (HTTP ${response.status}): ${text.slice(0, 180)}`); }
+    if (!response.ok || !data.ok) throw new Error(data.error || `HTTP ${response.status}`);
     return data;
 }
 
-async function loadPreview() {
-    previewIsValid = false;
-    completeCheckbox.checked = false;
-    setBusy(true);
-    resultBox.textContent = 'Vorschau wird geladen …';
-
-    try {
-        const data = await callSyncApi('preview');
-        previewIsValid = true;
-        renderPreview(data);
-    } catch (error) {
-        renderError(error);
-    } finally {
-        setBusy(false);
-    }
+function differences(items) {
+    if (!items?.length) return '';
+    return items.map(item => `${esc(labels[item.field] || item.field)}: «${esc(item.local)}» → «${esc(item.vf)}»`).join('<br>');
 }
 
-async function importPersons() {
-    if (!previewIsValid || !completeCheckbox.checked) {
-        return;
-    }
+function simpleTable(title, items) {
+    if (!items?.length) return `<h3>${esc(title)}</h3><p>Keine.</p>`;
+    return `<h3>${esc(title)}</h3><table><tr><th>VF-UID</th><th>Mitgliedsnr.</th><th>Name</th><th>Status</th></tr>`
+        + items.map(item => `<tr><td>${esc(item.vf_user_no)}</td><td>${esc(item.vf_member_no)}</td><td>${esc(item.display_name)}</td><td>${esc(item.membership_status)}</td></tr>`).join('')
+        + '</table>';
+}
 
-    setBusy(true);
-    resultBox.textContent = 'Personen werden importiert …';
+function changeTable(items) {
+    if (!items?.length) return '<h3>Geänderte Personen</h3><p>Keine.</p>';
+    return `<h3>Geänderte Personen</h3><table><tr><th>VF-UID</th><th>Name</th><th>Abweichungen</th></tr>`
+        + items.map(item => `<tr><td>${esc(item.vf_user_no)}</td><td>${esc(item.display_name)}</td><td>${differences(item.differences)}</td></tr>`).join('')
+        + '</table>';
+}
 
+function uidChangeTable(items) {
+    if (!items?.length) return '<h3>Erkannte UID-Wechsel</h3><p>Keine.</p>';
+    return `<h3>Erkannte UID-Wechsel</h3><table><tr><th>Mitgliedsnr.</th><th>Name lokal</th><th>Name VF</th><th>Alte UID</th><th>Neue UID</th><th>Weitere Änderungen</th></tr>`
+        + items.map(item => `<tr><td>${esc(item.vf_member_no)}</td><td>${esc(item.local_name)}</td><td>${esc(item.vf_name)}</td><td>${esc(item.old_vf_user_no)}</td><td>${esc(item.new_vf_user_no)}</td><td>${differences(item.differences)}</td></tr>`).join('')
+        + '</table>';
+}
+
+function conflictTable(items) {
+    if (!items?.length) return '<div class="okbox">Keine Identitätskonflikte.</div>';
+    return `<div class="warnbox"><strong>Import gesperrt: ${items.length} Identitätskonflikt(e).</strong></div>`
+        + `<table><tr><th>Typ</th><th>Mitgliedsnr.</th><th>VF-UID</th><th>VF-Name</th><th>Lokale Angaben</th></tr>`
+        + items.map(item => `<tr><td>${esc(item.type)}</td><td>${esc(item.vf_member_no)}</td><td>${esc(item.vf_user_no || item.second_vf_user_no)}</td><td>${esc(item.vf_name)}</td><td>${esc(item.local_member_name || '')} ${esc(item.local_member_vf_user_no || '')}</td></tr>`).join('')
+        + '</table>';
+}
+
+async function loadPreview() {
+    busy = true; previewValid = false; importAllowed = false;
+    confirmCheckbox.checked = false; updateButtons();
+    resultBox.textContent = 'Vorschau wird geladen …';
     try {
-        const data = await callSyncApi('import');
-        previewIsValid = false;
-        completeCheckbox.checked = false;
-        renderImportResult(data);
+        const data = await callApi('preview');
+        previewValid = true; importAllowed = data.import_allowed === true;
+        resultBox.innerHTML = `<h2>Sichere Vorschau</h2><div class="grid">`
+            + `<div class="metric"><b>${data.rows_received}</b><span>empfangen</span></div>`
+            + `<div class="metric"><b>${data.new_count}</b><span>neu</span></div>`
+            + `<div class="metric"><b>${data.uid_change_count}</b><span>UID-Wechsel</span></div>`
+            + `<div class="metric"><b>${data.changed_count}</b><span>geändert</span></div>`
+            + `<div class="metric"><b>${data.unchanged_count}</b><span>unverändert</span></div>`
+            + `<div class="metric"><b>${data.local_only_count}</b><span>nur lokal</span></div>`
+            + `<div class="metric"><b>${data.identity_conflict_count}</b><span>Konflikte</span></div>`
+            + `<div class="metric"><b>0</b><span>werden deaktiviert</span></div></div>`
+            + conflictTable(data.identity_conflicts)
+            + simpleTable('Neue Personen', data.new_sample)
+            + uidChangeTable(data.uid_change_sample)
+            + changeTable(data.changed_sample)
+            + simpleTable('Nur lokal, bleiben erhalten', data.local_only_sample);
     } catch (error) {
-        renderError(error);
-    } finally {
-        setBusy(false);
-    }
+        resultBox.innerHTML = `<div class="warnbox">${esc(error.message)}</div>`;
+    } finally { busy = false; updateButtons(); }
+}
+
+async function runImport() {
+    if (busy || !previewValid || !importAllowed || !confirmCheckbox.checked) return;
+    busy = true; updateButtons(); resultBox.textContent = 'Sicherer Import läuft …';
+    try {
+        const data = await callApi('import');
+        previewValid = false; importAllowed = false; confirmCheckbox.checked = false;
+        const result = data.result;
+        resultBox.innerHTML = `<div class="okbox"><h2>Import erfolgreich</h2><p>`
+            + `${result.inserted} neu, ${result.uid_changed} UID-Wechsel, `
+            + `${result.updated} aktualisiert, ${result.unchanged} unverändert, `
+            + `${result.deactivated} deaktiviert.</p></div>`;
+    } catch (error) {
+        resultBox.innerHTML = `<div class="warnbox">${esc(error.message)}</div>`;
+    } finally { busy = false; updateButtons(); }
 }
 
 previewButton.addEventListener('click', loadPreview);
-importButton.addEventListener('click', importPersons);
-completeCheckbox.addEventListener('change', updateImportButton);
-
-updateImportButton();
+importButton.addEventListener('click', runImport);
+confirmCheckbox.addEventListener('change', updateButtons);
+updateButtons();
 </script>
-
 </body>
 </html>
