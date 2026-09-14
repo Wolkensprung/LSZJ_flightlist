@@ -1,0 +1,25 @@
+.d1-exported-readonly {
+    position: relative;
+    border-color: #64748b !important;
+    background: #f8fafc !important;
+}
+.d1-exported-readonly input:disabled,
+.d1-exported-readonly select:disabled,
+.d1-exported-readonly textarea:disabled {
+    opacity: .72;
+    cursor: not-allowed;
+}
+.d1-export-lock-notice {
+    margin: .5rem 0 1rem;
+    padding: .85rem 1rem;
+    border-left: .35rem solid #475569;
+    border-radius: .35rem;
+    background: #e2e8f0;
+    color: #0f172a;
+}
+.d1-hidden-action { display: none !important; }
+.required-marker {
+    color: #b91c1c;
+    font-weight: 700;
+    margin-left: .2rem;
+}
