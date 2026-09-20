@@ -11,5 +11,10 @@
     "psr-4": {
       "LSZJ\\MasterData\\": "src/MasterData/"
     }
+  },
+  "config": {
+    "platform": {
+      "php": "8.3.0"
+    }
   }
 }
