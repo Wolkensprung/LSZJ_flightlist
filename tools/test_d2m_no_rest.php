@@ -1,0 +1,2 @@
+<?php
+declare(strict_types=1);if(PHP_SAPI!=='cli')exit(2);$files=['src/Vereinsflieger/ManualFlightSyncService.php','src/api_vf_manual_sync.php','public/vf_manual_sync.php'];foreach($files as $f){$s=file_get_contents(dirname(__DIR__).'/'.$f);if($s===false){echo "MISSING $f\n";exit(2);}foreach(['curl_','flight/get','flight/edit','flight/add','flight/delete','vereinsflieger.de/interface'] as $bad){if(str_contains($s,$bad)){echo "FAIL external operation marker $bad in $f\n";exit(3);}}}echo "PASS: D2M runtime contains no VF REST access.\n";exit(0);
