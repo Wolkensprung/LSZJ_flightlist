@@ -42,3 +42,19 @@ public+src.txt
 _local_archive_*/
 /deployment_endpoints.txt
 before_vf_api_import*.sql
+
+@'
+
+# Local workspace and cleanup artifacts
+.vscode/
+LSZJ.txt
+cleanup-report.json
+*.bak
+*.bak-*
+*_bak
+before_*.sql
+package-*/
+lszj-package-*.zip
+lszj-d1-*.zip
+lszj-d2-*.zip
+'@ | Add-Content .\.gitignore
