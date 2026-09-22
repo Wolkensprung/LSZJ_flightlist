@@ -2,6 +2,7 @@
 declare(strict_types=1);
 
 namespace LSZJ\MasterData;
+use LSZJ\Vereinsflieger\PilotSectorPolicy;
 
 use PDO;
 use RuntimeException;
@@ -15,14 +16,14 @@ final class VereinsfliegerCsvImporter
 
     public function importMembers(string $path, string $sourceFilename = 'Mitglieder.csv'): array
     {
-        $required = ['MitgliedsNr','Name','Mailadresse','Mobil (privat)','Mitgliedsstatus','Kostenstufe','Benutzernummer'];
+        $required = ['MitgliedsNr','Name','Mailadresse','Mobil (privat)','Mitgliedsstatus','Kostenstufe','Benutzernummer','Sparte'];
         $rows = CsvReader::read($path, $required);
         $stmt = $this->pdo->prepare(
             "INSERT INTO pilots_master
                 (vf_user_no, vf_member_no, display_name, search_name, email, mobile,
-                 membership_status, cost_level, priority_group, is_primary, is_active,
+                 membership_status, cost_level, sectors_json, can_fly_glider, can_fly_motor, priority_group, is_primary, is_selectable, is_active,
                  source_hash, imported_at)
-             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, ?, NOW())
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, 1, ?, NOW())
              ON DUPLICATE KEY UPDATE
                 vf_member_no = VALUES(vf_member_no),
                 display_name = VALUES(display_name),
@@ -31,6 +32,9 @@ final class VereinsfliegerCsvImporter
                 mobile = VALUES(mobile),
                 membership_status = VALUES(membership_status),
                 cost_level = VALUES(cost_level),
+                sectors_json = VALUES(sectors_json),
+                can_fly_glider = VALUES(can_fly_glider),
+                can_fly_motor = VALUES(can_fly_motor),
                 priority_group = VALUES(priority_group),
                 is_primary = VALUES(is_primary),
                 is_active = 1,
@@ -54,6 +58,7 @@ final class VereinsfliegerCsvImporter
                 $mobile = TextNormalizer::nullable($row['Mobil (privat)'] ?? '');
                 $status = TextNormalizer::clean($row['Mitgliedsstatus'] ?? '');
                 $costLevel = TextNormalizer::clean($row['Kostenstufe'] ?? '');
+                $capabilities = PilotSectorPolicy::capabilities($row['Sparte'] ?? '', true);
 
                 // Exakt dieser technische Vereinsdatensatz ist keine abrechenbare Person.
                 // Alle anderen Datensaetze bleiben erhalten, auch Organisationen und Externe.
@@ -78,7 +83,7 @@ final class VereinsfliegerCsvImporter
 
                 $priority = $this->priorityGroup($costLevel);
                 $isPrimary = $priority !== 'other' && TextNormalizer::searchKey($status) !== 'ausgeschieden';
-                $hash = hash('sha256', implode('|', [$userNo,$memberNo,$name,$emailRaw,(string)$mobile,$status,$costLevel]));
+                $hash = hash('sha256', implode('|', [$userNo,$memberNo,$name,$emailRaw,(string)$mobile,$status,$costLevel,$capabilities['sectors_json']]));
 
                 $stmt->execute([
                     $userNo,
@@ -89,6 +94,9 @@ final class VereinsfliegerCsvImporter
                     $mobile,
                     $status !== '' ? $status : null,
                     $costLevel !== '' ? $costLevel : null,
+                    $capabilities['sectors_json'],
+                    $capabilities['can_fly_glider'],
+                    $capabilities['can_fly_motor'],
                     $priority,
                     $isPrimary ? 1 : 0,
                     $hash,

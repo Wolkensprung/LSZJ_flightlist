@@ -15,6 +15,9 @@ final class MemberSyncService
         'mobile',
         'membership_status',
         'cost_level',
+        'sectors_json',
+        'can_fly_glider',
+        'can_fly_motor',
     ];
 
     public function __construct(
@@ -76,19 +79,20 @@ final class MemberSyncService
             $insertStatement = $this->pdo->prepare(
                 'INSERT INTO pilots_master '
                 . '(vf_user_no, vf_member_no, display_name, search_name, '
-                . 'email, mobile, membership_status, cost_level, '
-                . 'priority_group, is_primary, is_selectable, is_active, '
-                . 'source_hash, imported_at) '
-                . 'VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 0, 1, 1, ?, NOW())'
+                . 'email, mobile, membership_status, cost_level, sectors_json, '
+                . 'can_fly_glider, can_fly_motor, priority_group, is_primary, is_selectable, is_active, '
+                . 'source_hash, imported_at, vf_person_synced_at) '
+                . 'VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, 1, 1, ?, NOW(), NOW())'
             );
 
             $updateStatement = $this->pdo->prepare(
                 'UPDATE pilots_master SET '
                 . 'vf_user_no = ?, vf_member_no = ?, display_name = ?, '
                 . 'search_name = ?, email = ?, mobile = ?, '
-                . 'membership_status = ?, cost_level = ?, '
-                . 'priority_group = ?, is_active = 1, source_hash = ?, '
-                . 'imported_at = NOW() '
+                . 'membership_status = ?, cost_level = ?, sectors_json = ?, '
+                . 'can_fly_glider = ?, can_fly_motor = ?, priority_group = ?, '
+                . 'is_selectable = 1, is_active = 1, source_hash = ?, '
+                . 'imported_at = NOW(), vf_person_synced_at = NOW() '
                 . 'WHERE id = ?'
             );
 
@@ -128,6 +132,9 @@ final class MemberSyncService
                     $this->nullIfEmpty($final['mobile']),
                     $this->nullIfEmpty($final['membership_status']),
                     $this->nullIfEmpty($final['cost_level']),
+                    $final['sectors_json'],
+                    (int)$final['can_fly_glider'],
+                    (int)$final['can_fly_motor'],
                     $this->priorityGroup($final['cost_level']),
                     $this->sourceHash($final),
                 ]);
@@ -314,7 +321,7 @@ final class MemberSyncService
     private function currentIndexes(): array
     {
         $sql = 'SELECT id, vf_user_no, vf_member_no, display_name, '
-            . 'email, mobile, membership_status, cost_level, is_active '
+            . 'email, mobile, membership_status, cost_level, sectors_json, can_fly_glider, can_fly_motor, is_active '
             . 'FROM pilots_master';
 
         $byUid = [];
@@ -396,6 +403,10 @@ final class MemberSyncService
     {
         $final = [];
 
+        $capabilities = PilotSectorPolicy::capabilities($incoming['sectors'] ?? [], true);
+        $incoming['sectors_json'] = $capabilities['sectors_json'];
+        $incoming['can_fly_glider'] = (string)$capabilities['can_fly_glider'];
+        $incoming['can_fly_motor'] = (string)$capabilities['can_fly_motor'];
         foreach (self::COMPARE_FIELDS as $field) {
             $old = $this->normalized($current[$field] ?? '');
             $new = $this->normalized($incoming[$field] ?? '');
@@ -429,6 +440,9 @@ final class MemberSyncService
             $this->nullIfEmpty($final['mobile']),
             $this->nullIfEmpty($final['membership_status']),
             $this->nullIfEmpty($final['cost_level']),
+            $final['sectors_json'],
+            (int)$final['can_fly_glider'],
+            (int)$final['can_fly_motor'],
             $this->priorityGroup($final['cost_level']),
             $this->sourceHash($final),
             $localId,

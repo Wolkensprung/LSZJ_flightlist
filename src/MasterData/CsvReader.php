@@ -14,10 +14,20 @@ final class CsvReader
             throw new RuntimeException("CSV-Datei nicht lesbar: {$path}");
         }
 
-        $handle = fopen($path, 'rb');
-        if ($handle === false) {
-            throw new RuntimeException("CSV-Datei konnte nicht geoeffnet werden: {$path}");
+        $raw = file_get_contents($path);
+        if ($raw === false) {
+            throw new RuntimeException("CSV-Datei konnte nicht gelesen werden: {$path}");
         }
+        $raw = self::stripBom($raw);
+        if (!mb_check_encoding($raw, 'UTF-8')) {
+            throw new RuntimeException('CSV-Datei ist kein gueltiges UTF-8. Import abgebrochen.');
+        }
+        $handle = fopen('php://temp', 'w+b');
+        if ($handle === false) {
+            throw new RuntimeException('Temporärer CSV-Stream konnte nicht geöffnet werden.');
+        }
+        fwrite($handle, $raw);
+        rewind($handle);
 
         try {
             $firstLine = fgets($handle);
@@ -48,10 +58,17 @@ final class CsvReader
                     continue;
                 }
 
+                if (count($values) !== count($header)) {
+                    throw new RuntimeException("CSV-Zeile {$line} hat eine ungueltige Spaltenzahl. Import abgebrochen.");
+                }
                 $row = [];
                 foreach ($header as $index => $name) {
                     if ($name !== '') {
-                        $row[$name] = trim((string)($values[$index] ?? ''));
+                        $value = trim((string)($values[$index] ?? ''));
+                        if (!mb_check_encoding($value, 'UTF-8')) {
+                            throw new RuntimeException("CSV-Zeile {$line}, Spalte {$name} ist kein gueltiges UTF-8. Import abgebrochen.");
+                        }
+                        $row[$name] = $value;
                     }
                 }
 

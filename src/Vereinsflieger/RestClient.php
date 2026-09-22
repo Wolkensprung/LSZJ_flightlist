@@ -110,7 +110,11 @@ final class RestClient
             throw new RuntimeException(sprintf('VF antwortet bei %s %s mit HTTP %d.', $method, $path, $status));
         }
 
-        $decoded = json_decode($this->removeUtf8Bom((string)$body), true);
+        $json = $this->removeUtf8Bom((string)$body);
+        if (!mb_check_encoding($json, 'UTF-8')) {
+            throw new RuntimeException('VF-Antwort ist kein gueltiges UTF-8. Import abgebrochen.');
+        }
+        $decoded = json_decode($json, true, 512, JSON_THROW_ON_ERROR);
         if (!is_array($decoded)) {
             throw new RuntimeException('VF-Antwort ist kein gültiges JSON.');
         }

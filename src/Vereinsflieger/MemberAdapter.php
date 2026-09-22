@@ -92,6 +92,10 @@ final class MemberAdapter
                     $row,
                     ['costlevel', 'cost_level', 'kostenstufe']
                 ),
+                'sectors' => self::arrayValue(
+                    $row,
+                    ['sector', 'sectors', 'sparte', 'sparten']
+                ),
             ];
         }
 
@@ -99,6 +103,18 @@ final class MemberAdapter
             'rows' => $result,
             'warnings' => $warnings,
         ];
+    }
+
+    /** @param array<string,mixed> $row @param list<string> $keys @return list<string> */
+    private static function arrayValue(array $row, array $keys): array
+    {
+        foreach ($keys as $key) {
+            if (!array_key_exists($key, $row)) continue;
+            $value = $row[$key];
+            if ($value === null || $value === '') return [];
+            return PilotSectorPolicy::normalize($value, true);
+        }
+        return [];
     }
 
     /**
