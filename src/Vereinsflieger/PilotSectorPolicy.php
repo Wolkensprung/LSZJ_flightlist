@@ -41,10 +41,7 @@ final class PilotSectorPolicy
                 continue;
             }
 
-            $key = mb_strtolower(
-                $item,
-                'UTF-8'
-            );
+            $key = mb_strtolower($item, 'UTF-8');
 
             $normalized = match ($key) {
                 'sf',
@@ -92,11 +89,6 @@ final class PilotSectorPolicy
             true
         );
 
-        $hasKnownFlightSector =
-            $hasGlider
-            || $hasMotorGlider
-            || $hasMotor;
-
         return [
             'sectors_json' => json_encode(
                 $sectors,
@@ -106,14 +98,12 @@ final class PilotSectorPolicy
             ),
 
             'can_fly_glider' => (
-                !$hasKnownFlightSector
-                || $hasGlider
+                $hasGlider
                 || $hasMotorGlider
             ) ? 1 : 0,
 
             'can_fly_motor' => (
-                !$hasKnownFlightSector
-                || $hasMotor
+                $hasMotor
                 || $hasMotorGlider
             ) ? 1 : 0,
         ];
