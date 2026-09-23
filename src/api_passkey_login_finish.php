@@ -8,7 +8,6 @@ try {
     if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
         json_response(['ok' => false, 'error' => 'Methode nicht erlaubt.'], 405);
     }
-    auth_require_login();
     $input = json_decode(file_get_contents('php://input'), true);
     if (!is_array($input)) {
         json_response(['ok' => false, 'error' => 'Ungültige JSON-Daten.'], 400);
@@ -18,12 +17,18 @@ try {
     if (!is_array($credential)) {
         json_response(['ok' => false, 'error' => 'Credential fehlt.'], 400);
     }
-    $id = passkey_finish_registration(
-        json_encode($credential, JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES),
-        (string)($input['device_name'] ?? '')
+    $user = passkey_finish_login(
+        json_encode($credential, JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES)
     );
-    json_response(['ok' => true, 'id' => $id, 'message' => 'Passkey wurde registriert.']);
+    json_response([
+        'ok' => true,
+        'user' => [
+            'id' => (int)$user['id'],
+            'display_name' => (string)$user['display_name'],
+        ],
+        'redirect' => 'dashboard.php',
+    ]);
 } catch (Throwable $e) {
-    error_log('Passkey registration finish: ' . $e->getMessage());
+    error_log('Passkey login finish: ' . $e->getMessage());
     json_response(['ok' => false, 'error' => $e->getMessage()], 422);
 }

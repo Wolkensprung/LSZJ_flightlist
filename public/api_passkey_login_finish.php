@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-$implementation = dirname(__DIR__) . '/src/api_passkey_register_options.php';
+$implementation = dirname(__DIR__) . '/src/api_passkey_login_finish.php';
 if (!is_file($implementation)) {
     http_response_code(500);
     header('Content-Type: application/json; charset=utf-8');
