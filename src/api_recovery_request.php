@@ -2,6 +2,7 @@
 declare(strict_types=1);
 require_once __DIR__ . '/recovery.php';
 require_once __DIR__ . '/helpers.php';
+require_once __DIR__ . '/recovery_mail.php';
 
 try {
   if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
@@ -22,7 +23,7 @@ try {
     json_response(['ok'=>true,'message'=>'Falls die Mailadresse bekannt ist, wurde ein Recovery-Token erstellt.']);
   }
 
-  $token=recovery_create_token((int)$user['id']);
+/*  $token=recovery_create_token((int)$user['id']);
 
   json_response([
     'ok'=>true,
@@ -32,7 +33,23 @@ try {
       'display_name'=>(string)$user['display_name'],
     ],
     'token'=>$token['token']
-  ]);
+  ]); */
+
+  $token = recovery_create_token(
+    (int)$user['id']
+);
+
+send_recovery_mail(
+    (string)$user['email'],
+    (string)$user['display_name'],
+    (string)$token['token']
+);
+
+json_response([
+    'ok' => true,
+    'message' =>
+        'Falls die Mailadresse bekannt ist, wurde ein Recovery-Link versendet.'
+]);
 
 } catch(Throwable $e){
   error_log('Recovery request: '.$e->getMessage());
