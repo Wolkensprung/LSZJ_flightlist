@@ -1,47 +1,72 @@
 [
   {
-    "file": "README-Paket-B-v2.md",
-    "bytes": 1716,
-    "sha256": "4e41a2c4c62ac4bf1318498a85b8676abb6b6af180e0d2c4898285a05a913da3"
+    "file": "bin/vf_person_sync.php",
+    "sha256": "98dd8f56ca1b21ce39c267e4eb7daf1dcf2184780f66881c9dd433e40d3dd03c",
+    "bytes": 807
   },
   {
-    "file": "patches/dashboard-link.txt",
-    "bytes": 251,
-    "sha256": "ecab35e93d20ee1a38d01fb4090667fa3e871f9e27c5c797df56d3127300984c"
+    "file": "database/20260922_person_membership_sectors.sql",
+    "sha256": "2506ff4152b55025c279c5b309c78dbcb455f3cb1dafc73dd76be982e3b9c71a",
+    "bytes": 826
   },
   {
-    "file": "public/vf_person_sync.php",
-    "bytes": 3084,
-    "sha256": "6c6286d9698e41027f59a2a249c4b617d1819dca248dffd47454eee886f826d0"
+    "file": "docs/DEPLOY_PERSON_IMPORT.md",
+    "sha256": "26a2f29e5e595afa999128049b4342df2e5bd4bf5792a82d5276ee2487b280d7",
+    "bytes": 930
+  },
+  {
+    "file": "public/master_data_autocomplete.js",
+    "sha256": "b4eec2acf78d73aa7767dadd911686288f94e101101ca9f5f6b5dff646e1a7ed",
+    "bytes": 10876
+  },
+  {
+    "file": "src/MasterData/CsvReader.php",
+    "sha256": "ce4f9e8937badeb3a782304a72dd87a77eceb0e894857bdec41970db5fdd2a87",
+    "bytes": 4100
+  },
+  {
+    "file": "src/MasterData/VereinsfliegerCsvImporter.php",
+    "sha256": "bc6375bcd36437b6593731b17797a54f3232a085f02a1936bfba9d1071b59148",
+    "bytes": 10765
   },
   {
     "file": "src/Vereinsflieger/MemberAdapter.php",
-    "bytes": 1516,
-    "sha256": "91389a5680796a04d273c72d70824c37898dbd3ba55f8efa5c349e68cc0fe2d0"
+    "sha256": "6bfc7add5b2ecfa8be083d7534fdace0c4b692881843344554ab847b1e0d9969",
+    "bytes": 4776
   },
   {
     "file": "src/Vereinsflieger/MemberSyncService.php",
-    "bytes": 2561,
-    "sha256": "c244c0b7baa4801df142ccb0fa7c23f4fc57344a02e4d277d1ce577eb749efa7"
+    "sha256": "a46aa3aabe1e0ee760c25f9ba18e8f678b44e957257b6313928b8ac45b78483b",
+    "bytes": 17014
+  },
+  {
+    "file": "src/Vereinsflieger/PilotSectorPolicy.php",
+    "sha256": "8f0dda82bcaa17d9f60e7052a7986d5e6a03a7fe410943972a536802e2f970f5",
+    "bytes": 2196
   },
   {
     "file": "src/Vereinsflieger/RestClient.php",
-    "bytes": 5278,
-    "sha256": "cde12a76417852fd583daa87d500dcd29e34614e0aba4ed41cf4134d4522555a"
+    "sha256": "b76656ea05f7410aa2248f4b2a32e457d0aaa1fb2df60b54b24b43c008aadea4",
+    "bytes": 6996
   },
   {
-    "file": "src/api_vf_person_sync.php",
-    "bytes": 1138,
-    "sha256": "6eddc5e98d3669e56f1f1e5e05ce41b2192b600566b0a08bd0f16face255ea5a"
+    "file": "src/api_search_pilots.php",
+    "sha256": "5fa94da7b24fc6ac4de4d5a7d0237fb633d34c9098857489ad14c2053be99c95",
+    "bytes": 1786
+  },
+  {
+    "file": "src/master_data_bootstrap.php",
+    "sha256": "3aa1346001b0dae5aaaaf20302e6d054c739c7232300c0c1a9cb96b65ab041a0",
+    "bytes": 334
   },
   {
     "file": "src/vf_api_bootstrap.php",
-    "bytes": 300,
-    "sha256": "e74437d7ecd5fc77fd24beb6d78ca7c814eee8244a123b494c82cec5c982c14c"
+    "sha256": "1030e220e09c36daad3ced6e1f23518395ccf77ee155261c90766a2404e8a73d",
+    "bytes": 362
   },
   {
-    "file": "src/vf_api_config.php",
-    "bytes": 756,
-    "sha256": "4ade24e07aa3359f3848eae918555284bb8d8b7d0ce9b06b94f9a08d4daea428"
+    "file": "tools/test_pilot_sector_policy.php",
+    "sha256": "9b502eb3167fb36653ee874393fb5a5b5d98d660f562c1b5ae6a3dd04db0af91",
+    "bytes": 470
   }
 ]
