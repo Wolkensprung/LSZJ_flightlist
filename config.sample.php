@@ -12,6 +12,8 @@ return [
     ],
     'app' => [
         'timezone' => 'Europe/Zurich',
+        // Unter PHP-FPM explizit die CLI-Binary angeben.
+        'php_cli_binary' => '/usr/local/php83/bin/php',
     ],
     'vereinsflieger_api' => [
     'base_url' => 'https://www.vereinsflieger.de/interface/rest',

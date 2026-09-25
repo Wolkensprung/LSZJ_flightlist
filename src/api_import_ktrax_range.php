@@ -121,6 +121,61 @@ function log_ktrax_import(
     ]);
 }
 
+/**
+ * Ermittelt explizit eine PHP-CLI-Binary.
+ *
+ * Unter PHP-FPM zeigt PHP_BINARY auf php-fpm. Dieses Programm kann keine
+ * CLI-Skripte ausführen und beendet den Aufruf mit Exit-Code 64. Darum wird
+ * PHP_BINARY nur verwendet, wenn es tatsächlich eine CLI-Binary ist.
+ */
+function resolve_php_cli_binary(array $config): string
+{
+    $configured = trim((string)(
+        $config['app']['php_cli_binary']
+        ?? getenv('PHP_CLI_BINARY')
+        ?: ''
+    ));
+
+    $suffix = DIRECTORY_SEPARATOR === '\\' ? '.exe' : '';
+    $candidates = [
+        $configured,
+        PHP_BINDIR . DIRECTORY_SEPARATOR . 'php' . $suffix,
+        dirname(dirname(PHP_BINARY)) . DIRECTORY_SEPARATOR . 'bin'
+            . DIRECTORY_SEPARATOR . 'php' . $suffix,
+        PHP_BINARY,
+    ];
+
+    if (DIRECTORY_SEPARATOR !== '\\') {
+        $candidates[] = '/usr/local/bin/php';
+        $candidates[] = '/usr/bin/php';
+        $candidates[] = '/bin/php';
+    }
+
+    $checked = [];
+    foreach ($candidates as $candidate) {
+        if ($candidate === '' || in_array($candidate, $checked, true)) {
+            continue;
+        }
+        $checked[] = $candidate;
+
+        $baseName = strtolower(basename($candidate));
+        if (str_contains($baseName, 'php-fpm') || str_contains($baseName, 'php-cgi')) {
+            continue;
+        }
+
+        if (is_file($candidate) && is_executable($candidate)) {
+            return $candidate;
+        }
+    }
+
+    throw new RuntimeException(
+        'Keine PHP-CLI-Binary gefunden. Setze app.php_cli_binary in config.php '
+        . 'oder die Umgebungsvariable PHP_CLI_BINARY auf den vollständigen Pfad '
+        . '(zum Beispiel /usr/local/php83/bin/php). Geprüft: '
+        . implode(', ', $checked)
+    );
+}
+
 /** @return array<string,mixed> */
 function run_ktrax_day_import(
     string $date,
@@ -144,7 +199,7 @@ function run_ktrax_day_import(
     ];
 
     $command = [
-        PHP_BINARY,
+        resolve_php_cli_binary($GLOBALS['config']),
         $runner,
         $date,
         strtolower($airfield),
