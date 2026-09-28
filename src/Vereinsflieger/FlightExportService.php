@@ -206,6 +206,7 @@ final class FlightExportService
 
             $response = $this->client->addFlight($payload);
             $flid = $this->extractFlid($response);
+            $this->assertAircraftTowCreated($payload, $response);
 
             if ($flid === '') {
                 throw new RuntimeException(
@@ -506,6 +507,46 @@ final class FlightExportService
         return array_values(array_unique($issues));
     }
 
+    /**
+     * Ein HTTP-200 genuegt bei F-Schlepp nicht: Vereinsflieger muss den
+     * zugehoerigen Schleppflug angelegt und ueber flidtow bestaetigt haben.
+     *
+     * @param array<string,string> $payload
+     * @param array<string,mixed> $response
+     */
+    private function assertAircraftTowCreated(
+        array $payload,
+        array $response
+    ): void {
+        $isAircraftTow = ($payload['starttype'] ?? '') === 'F'
+            && trim((string)($payload['towcallsign'] ?? '')) !== '';
+
+        if (!$isAircraftTow) {
+            return;
+        }
+
+        $responseStartType = (int)($response['starttype']
+            ?? ($response['data']['starttype'] ?? 0));
+        $towFlid = (int)($response['flidtow']
+            ?? ($response['data']['flidtow'] ?? 0));
+        $towCallsign = trim((string)($response['towcallsign']
+            ?? ($response['data']['towcallsign'] ?? '')));
+
+        if (
+            $responseStartType !== 3
+            || $towFlid <= 0
+            || $towCallsign === ''
+        ) {
+            throw new RuntimeException(
+                'VF hat den F-Schlepp nicht vollstaendig angelegt: '
+                . 'starttype=' . $responseStartType
+                . ', flidtow=' . $towFlid
+                . ', towcallsign='
+                . ($towCallsign === '' ? '<leer>' : $towCallsign)
+                . '. Lokale Eintraege wurden nicht als exportiert markiert.'
+            );
+        }
+    }
     private function extractFlid(array $response): string
     {
         foreach (['flid', 'id', 'flightid'] as $key) {

@@ -88,7 +88,7 @@ final class FlightPayloadBuilder
                     ?? $entry['uid_attendant_3']
                     ?? null
             ),
-            'starttype' => self::optionalIntegerString(
+            'starttype' => self::vfWriteStartType(
                 $entry['start_type'] ?? null
             ),
             'departuretime' => self::formatDateTime($departure),
@@ -394,6 +394,24 @@ final class FlightPayloadBuilder
         ];
     }
 
+    /**
+     * Vereinsflieger erwartet beim Schreiben E, F oder W.
+     * Intern werden die numerischen Lesewerte 1, 3 und 5 gespeichert.
+     */
+    private static function vfWriteStartType(mixed $value): string
+    {
+        $value = strtoupper(trim((string)$value));
+
+        return match ($value) {
+            '' => '',
+            '1', 'E' => 'E',
+            '3', 'F' => 'F',
+            '5', 'W' => 'W',
+            default => throw new RuntimeException(
+                'Nicht unterstuetzte Startart fuer Vereinsflieger: ' . $value
+            ),
+        };
+    }
     private static function optionalIntegerString(
         mixed $value
     ): string {
