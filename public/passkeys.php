@@ -19,6 +19,24 @@ $stmt = db()->prepare(
 $stmt->execute(['user_id' => (int)$user['id']]);
 $passkeys = $stmt->fetchAll(PDO::FETCH_ASSOC);
 $activeCount = count($passkeys);
+
+session_start_if_needed();
+$recoveryMarker = $_SESSION['passkey_recovery'] ?? null;
+$recoveryActive = false;
+$recoveryRevokeExisting = false;
+
+if (is_array($recoveryMarker)) {
+    $confirmedAt = (int)($recoveryMarker['confirmed_at'] ?? 0);
+    $sameUser = (int)($recoveryMarker['user_id'] ?? 0) === (int)$user['id'];
+    $notExpired = $confirmedAt > 0 && (time() - $confirmedAt) <= 900;
+
+    if ($sameUser && $notExpired) {
+        $recoveryActive = true;
+        $recoveryRevokeExisting = ($recoveryMarker['revoke_existing'] ?? false) === true;
+    } else {
+        unset($_SESSION['passkey_recovery']);
+    }
+}
 ?>
 <!doctype html>
 <html lang="de">
@@ -41,12 +59,33 @@ $activeCount = count($passkeys);
         .bad{background:#fff0f0;color:#970018;border-left:5px solid #b00020}
         .hint{color:#667085;line-height:1.5}
         .actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+        .recovery-notice{margin-bottom:16px;padding:16px 18px;border-left:5px solid #1769aa;background:#eef6fc;border-radius:9px;line-height:1.5}
+        .recovery-notice strong{display:block;margin-bottom:5px}
+        .recovery-notice p{margin:6px 0 0}
         @media(max-width:560px){.passkey-item{align-items:stretch;flex-direction:column}.danger-button{width:100%}}
     </style>
 </head>
 <body>
 <main class="passkey-wrap">
     <h1>Passkeys</h1>
+
+    <?php if ($recoveryActive): ?>
+        <section class="recovery-notice" role="status">
+            <strong>Recovery-Modus aktiv</strong>
+            <?php if ($recoveryRevokeExisting): ?>
+                <p>
+                    Registriere den neuen Passkey auf dem ErsatzgerÃ¤t. Die bisherigen Passkeys bleiben aus SicherheitsgrÃ¼nden aktiv,
+                    bis der neue Passkey erfolgreich validiert und gespeichert wurde. Danach werden die bisherigen Passkeys automatisch widerrufen.
+                </p>
+            <?php else: ?>
+                <p>Registriere den Passkey auf dem zusÃ¤tzlichen GerÃ¤t. Bestehende Passkeys bleiben aktiv.</p>
+            <?php endif; ?>
+            <p>
+                Falls auf diesem GerÃ¤teprofil bereits ein Passkey fÃ¼r die LSZJ Startliste existiert,
+                verwende ein anderes GerÃ¤t oder lÃ¶sche den lokalen GerÃ¤te-Passkey zuerst in der Passkeyverwaltung des Betriebssystems.
+            </p>
+        </section>
+    <?php endif; ?>
 
     <section class="card">
         <strong><?= htmlspecialchars((string)$user['display_name'], ENT_QUOTES, 'UTF-8') ?></strong>
