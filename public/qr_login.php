@@ -3,158 +3,26 @@ declare(strict_types=1);
 
 require_once __DIR__ . '/../src/auth.php';
 
-// Eine bestehende persönliche oder C-Büro-Sitzung wird nicht überschrieben.
 if (auth_user() !== null) {
     header('Location: dashboard.php');
     exit;
 }
+
+$config = app_config();
+$legacyLoginEnabled = (bool)($config['auth']['legacy_login_enabled'] ?? true);
+$recoveryUrl = rtrim((string)($config['recovery']['base_url'] ?? ''), '/') . '/recovery_request.php';
 ?>
 <!doctype html>
-<html lang="de">
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width,initial-scale=1">
-    <title>LSZJ QR-Login</title>
-    <link rel="stylesheet" href="app.css">
-    <style>
-        .wrap{max-width:720px;margin:30px auto;padding:0 12px}
-        .qr{display:block;width:min(320px,100%);height:auto;margin:18px auto;border:1px solid #d9e0e8}
-        .status{padding:14px;border-left:5px solid #1769aa;background:#eef6fc;border-radius:8px;line-height:1.5}
-        .good{border-color:#17823b;background:#eefaf1}
-        .bad{border-color:#b00020;background:#fff0f0;color:#970018}
-        .actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
-    </style>
-</head>
-<body>
-<main class="wrap">
-    <h1>Mit Smartphone anmelden</h1>
-    <section class="card">
-        <p>QR-Code mit dem persönlichen Smartphone scannen und die Anmeldung dort bestätigen.</p>
-        <div class="actions">
-            <button id="create" type="button">QR-Code erzeugen</button>
-            <a class="button secondary" href="passkey_login.php">Mit Passkey anmelden</a>
-        </div>
-        <img id="qr" class="qr" alt="QR-Code für die C-Büro-Anmeldung" hidden>
-        <div id="status" class="status" role="status" aria-live="polite" hidden></div>
-    </section>
-</main>
+<html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>LSZJ C-Büro-Anmeldung</title><link rel="stylesheet" href="app.css">
+<style>
+:root{--blue:#1769aa;--blue-dark:#0f568e;--green:#17823b;--red:#b00020;--text:#1f2937;--muted:#667085;--border:#d9e0e8;--bg:#f4f6f8}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text)}.wrap{width:min(calc(100% - 24px),760px);margin:28px auto}.login-card{background:#fff;border:1px solid var(--border);border-radius:14px;box-shadow:0 8px 24px rgba(15,23,42,.08);padding:clamp(22px,5vw,38px)}.kicker{margin:0 0 8px;color:var(--blue);font-size:.85rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase}h1{margin:0 0 10px}.intro{color:var(--muted);line-height:1.55}.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}.primary{min-height:46px;padding:10px 18px;border:0;border-radius:8px;background:var(--blue);color:#fff;font:inherit;font-weight:800;cursor:pointer}.primary:disabled{opacity:.6}.qr{display:block;width:min(330px,100%);height:auto;margin:20px auto;border:1px solid var(--border)}.status{padding:14px;border-left:5px solid var(--blue);background:#eef6fc;border-radius:8px;line-height:1.5}.good{border-color:var(--green);background:#eefaf1}.bad{border-color:var(--red);background:#fff0f0;color:#970018}.onboarding{margin-top:26px;padding:18px;border:1px solid var(--border);border-radius:10px;background:#fafbfc}.onboarding h2{margin:0 0 8px;font-size:1.15rem}.onboarding p{color:var(--muted);line-height:1.5}.setup-grid{display:grid;grid-template-columns:minmax(0,1fr) 150px;gap:18px;align-items:center}.setup-qr{display:block;width:150px;height:150px}.url{overflow-wrap:anywhere;color:#475467;font-size:.86rem}.test-login{margin-top:24px;padding-top:16px;border-top:1px solid var(--border);font-size:.9rem;color:var(--muted)}.test-login a{color:#475467}.test-badge{display:inline-block;margin-right:7px;padding:2px 7px;border-radius:999px;background:#fff3cd;color:#73510d;font-size:.75rem;font-weight:800;text-transform:uppercase}@media(max-width:560px){.setup-grid{grid-template-columns:1fr}.setup-qr{margin:auto}.primary{width:100%}}
+</style></head><body><main class="wrap"><section class="login-card"><p class="kicker">LSZJ Startliste</p><h1>C-Büro anmelden</h1><p class="intro">QR-Code mit dem persönlichen Smartphone scannen und die Anmeldung dort mit dem eigenen Passkey bestätigen.</p><div class="actions"><button id="create" class="primary" type="button">QR-Code erzeugen</button><a class="button secondary" href="passkey_login.php">Mit Passkey anmelden</a></div><img id="qr" class="qr" alt="QR-Code für die C-Büro-Anmeldung" hidden><div id="status" class="status" role="status" aria-live="polite" hidden></div>
+
+<section class="onboarding"><div class="setup-grid"><div><h2>Noch keinen Passkey?</h2><p>Scanne diesen QR-Code mit dem persönlichen Smartphone. Richte den Passkey dort per E-Mail-Link ein. Danach hier einen neuen Login-QR-Code erzeugen.</p><p class="url"><?=htmlspecialchars($recoveryUrl,ENT_QUOTES,'UTF-8')?></p></div><img class="setup-qr" src="api_onboarding_qr_code.php" alt="QR-Code zur Passkey-Ersteinrichtung"></div></section>
+<?php if($legacyLoginEnabled):?><p class="test-login"><span class="test-badge">Test</span><a href="login.php">Vorläufig als anderer Benutzer anmelden</a></p><?php endif;?>
+</section></main>
 <script>
-const csrf = <?= json_encode(csrf_token(), JSON_THROW_ON_ERROR) ?>;
-let token = null;
-let timer = null;
-let consuming = false;
-
-const qrImage = document.getElementById('qr');
-const statusBox = document.getElementById('status');
-const createButton = document.getElementById('create');
-
-function show(message, kind = '') {
-    statusBox.hidden = false;
-    statusBox.className = 'status' + (kind ? ' ' + kind : '');
-    statusBox.textContent = message;
-}
-
-function stopPolling() {
-    if (timer !== null) {
-        clearInterval(timer);
-        timer = null;
-    }
-}
-
-async function consumeApprovedSession() {
-    if (!token || consuming) return;
-    consuming = true;
-    stopPolling();
-    show('Freigabe erhalten. C-Büro wird angemeldet ...', 'good');
-
-    try {
-        const response = await fetch('api_qr_login_consume.php', {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({csrf_token: csrf, token}),
-        });
-        const result = await response.json();
-        if (!response.ok || !result.ok) {
-            throw new Error(result.error || 'QR-Anmeldung konnte nicht übernommen werden.');
-        }
-        window.location.assign(result.redirect || 'dashboard.php');
-    } catch (error) {
-        show(error.message || String(error), 'bad');
-        createButton.disabled = false;
-        consuming = false;
-    }
-}
-
-async function poll() {
-    if (!token || consuming) return;
-
-    try {
-        const response = await fetch('api_qr_login_status.php', {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({csrf_token: csrf, token}),
-        });
-        const result = await response.json();
-        if (!response.ok || !result.ok) {
-            throw new Error(result.error || 'Status konnte nicht gelesen werden.');
-        }
-
-        const status = result.session.status;
-        if (status === 'pending') {
-            show('Warte auf die Bestätigung am Smartphone ...');
-            return;
-        }
-        if (status === 'approved') {
-            await consumeApprovedSession();
-            return;
-        }
-
-        stopPolling();
-        createButton.disabled = false;
-        qrImage.hidden = true;
-
-        if (status === 'expired') {
-            show('Der QR-Code ist abgelaufen. Erzeuge einen neuen QR-Code.', 'bad');
-        } else if (status === 'consumed') {
-            show('Diese QR-Anmeldung wurde bereits verwendet.', 'bad');
-        } else {
-            show('QR-Anmeldung beendet: ' + status, 'bad');
-        }
-    } catch (error) {
-        stopPolling();
-        createButton.disabled = false;
-        show(error.message || String(error), 'bad');
-    }
-}
-
-createButton.addEventListener('click', async () => {
-    createButton.disabled = true;
-    consuming = false;
-    stopPolling();
-
-    try {
-        const response = await fetch('api_qr_login_create.php', {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({csrf_token: csrf}),
-        });
-        const result = await response.json();
-        if (!response.ok || !result.ok) {
-            throw new Error(result.error || 'QR-Session konnte nicht erzeugt werden.');
-        }
-
-        token = result.session.token;
-        qrImage.src = 'api_qr_login_code.php?token=' + encodeURIComponent(token);
-        qrImage.hidden = false;
-        show('Warte auf die Bestätigung am Smartphone ...');
-        timer = setInterval(poll, 2000);
-    } catch (error) {
-        createButton.disabled = false;
-        show(error.message || String(error), 'bad');
-    }
-});
-
-window.addEventListener('beforeunload', stopPolling);
-</script>
-</body>
-</html>
+const csrf=<?=json_encode(csrf_token(),JSON_THROW_ON_ERROR)?>;let token=null,timer=null,consuming=false;const qrImage=document.getElementById('qr'),statusBox=document.getElementById('status'),createButton=document.getElementById('create');function show(m,k=''){statusBox.hidden=false;statusBox.className='status'+(k?' '+k:'');statusBox.textContent=m;}function stop(){if(timer!==null){clearInterval(timer);timer=null;}}async function consume(){if(!token||consuming)return;consuming=true;stop();show('Freigabe erhalten. C-Büro wird angemeldet ...','good');try{const r=await fetch('api_qr_login_consume.php',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({csrf_token:csrf,token})});const j=await r.json();if(!r.ok||!j.ok)throw new Error(j.error||'QR-Anmeldung konnte nicht übernommen werden.');window.location.assign(j.redirect||'dashboard.php');}catch(e){show(e.message||String(e),'bad');createButton.disabled=false;consuming=false;}}
+async function poll(){if(!token||consuming)return;try{const r=await fetch('api_qr_login_status.php',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({csrf_token:csrf,token})});const j=await r.json();if(!r.ok||!j.ok)throw new Error(j.error||'Status konnte nicht gelesen werden.');const st=j.session.status;if(st==='pending'){show('Warte auf die Bestätigung am Smartphone ...');return;}if(st==='approved'){await consume();return;}stop();createButton.disabled=false;qrImage.hidden=true;if(st==='expired')show('Der QR-Code ist abgelaufen. Falls Du gerade einen Passkey eingerichtet hast, erzeuge jetzt einen neuen QR-Code.','bad');else show('QR-Anmeldung beendet: '+st,'bad');}catch(e){stop();createButton.disabled=false;show(e.message||String(e),'bad');}}
+createButton.addEventListener('click',async()=>{createButton.disabled=true;consuming=false;stop();try{const r=await fetch('api_qr_login_create.php',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({csrf_token:csrf})});const j=await r.json();if(!r.ok||!j.ok)throw new Error(j.error||'QR-Session konnte nicht erzeugt werden.');token=j.session.token;qrImage.src='api_qr_login_code.php?token='+encodeURIComponent(token);qrImage.hidden=false;show('Warte auf die Bestätigung am Smartphone ...');timer=setInterval(poll,2000);}catch(e){createButton.disabled=false;show(e.message||String(e),'bad');}});window.addEventListener('beforeunload',stop);
+</script></body></html>
