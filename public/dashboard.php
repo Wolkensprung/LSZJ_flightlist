@@ -72,6 +72,7 @@ $activeDutyOfficer = duty_officer_active();
     </style>
 </head>
 <body>
+<header class="dashboard-header-actions"><a class="button secondary dashboard-logout" href="logout_qr.php">Logout</a></header>
 <div class="card">
     <div class="row">
         <div>
