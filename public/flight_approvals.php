@@ -125,7 +125,7 @@ async function loadData(){history.replaceState(null,'',location.pathname+'?'+ran
 loadData();
 </script>
 <script src="ktrax_import_range.js"></script>
-<script src="i18n_hotfix_02.js?v=20260818_1"></script>
+<script src="i18n.js?v=20261001_3"></script>
 <script src="master_data_autocomplete.js"></script>
 </body>
 </html>
