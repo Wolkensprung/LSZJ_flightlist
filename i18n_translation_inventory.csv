@@ -1,0 +1,199 @@
+source_text;lang;translation_text;category
++ Flug manuell erfassen;fr;+ Saisir un vol manuellement;ui_or_system
+Abbrechen;fr;Annuler;ui_or_system
+Abmelden;fr;Se déconnecter;ui_or_system
+Abrechnung;fr;Facturation;ui_or_system
+Abstimmung;fr;Rapprochement;ui_or_system
+Abstimmung erforderlich;fr;Rapprochement requis;ui_or_system
+Administration;fr;Administration;ui_or_system
+Administrativ beenden;fr;Clôturer administrativement;ui_or_system
+Administrator;fr;Administrateur;ui_or_system
+Administratorrolle erforderlich.;fr;Rôle administrateur requis.;ui_or_system
+Aktiv;fr;Actif;ui_or_system
+Aktiver Flugdienstleiter:;fr;Chef de service de vol actif :;ui_or_system
+all;fr;Tous;ui_or_system
+Alle;fr;Tous;ui_or_system
+Alle bekannten Piloten anzeigen;fr;Afficher tous les pilotes connus;ui_or_system
+Alle Flüge sind freigegeben oder bereits exportiert.;fr;Tous les vols sont validés ou déjà exportés.;ui_or_system
+Alle gestarteten Flüge besitzen eine Landung.;fr;Tous les vols commencés possèdent un atterrissage.;ui_or_system
+Angemeldet:;fr;Connecté :;ui_or_system
+Anmelden;fr;Se connecter;ui_or_system
+Anmeldung erforderlich.;fr;Connexion requise.;ui_or_system
+approved;fr;Validé;technical
+Bearbeiten;fr;Modifier;ui_or_system
+Begleiter;fr;Accompagnant;ui_or_system
+Begleiter / FI;fr;Accompagnant / FI;ui_or_system
+Benutzer;fr;Utilisateur;ui_or_system
+Benutzer nicht gefunden.;fr;Utilisateur introuvable.;ui_or_system
+Benutzer und Rollen wurden gespeichert.;fr;L’utilisateur et les rôles ont été enregistrés.;ui_or_system
+Benutzerverwaltung;fr;Gestion des utilisateurs;ui_or_system
+Bereits nach Vereinsflieger exportiert, schreibgeschützt.;fr;Déjà exporté vers Vereinsflieger, en lecture seule.;ui_or_system
+bereits vorhanden;fr;déjà présent;ui_or_system
+Bereits vorhanden:;fr;Déjà présents :;ui_or_system
+Betriebstag;fr;Journée d’exploitation;ui_or_system
+Bis;fr;Au;ui_or_system
+bis;fr;au;ui_or_system
+Bis darf nicht vor Von liegen.;fr;La date de fin ne peut pas précéder la date de début.;ui_or_system
+Bitte auswählen;fr;Veuillez sélectionner;ui_or_system
+Bitte eine gültige Mailadresse eingeben.;fr;Veuillez saisir une adresse e-mail valide.;ui_or_system
+Bitte Von und Bis setzen.;fr;Veuillez renseigner les dates Du et Au.;ui_or_system
+Bitte wählen;fr;Veuillez sélectionner;ui_or_system
+closed;fr;Clôturé;ui_or_system
+completed;fr;Terminé;ui_or_system
+correction_required;fr;Correction requise;technical
+CSV-Stammdatenimport;fr;Import CSV des données de base;ui_or_system
+D1-Änderungsliste;fr;Liste des modifications D1;ui_or_system
+Dashboard;fr;Tableau de bord;ui_or_system
+Datumsfilter Von/Bis nicht gefunden.;fr;Filtres de date Du/Au introuvables.;ui_or_system
+Der letzte aktive Administrator kann nicht deaktiviert oder seiner Administratorrolle beraubt werden.;fr;Le dernier administrateur actif ne peut pas être désactivé ni privé de son rôle administrateur.;ui_or_system
+Details;fr;Détails;ui_or_system
+Details:;fr;Détails :;ui_or_system
+Dienst übernehmen;fr;Prendre le service;ui_or_system
+Diese Angaben werden für Vereinsflieger und die Rechnungsstellung benötigt. Im Export wird automatisch „Nachname, Vorname“ gebildet.;fr;Ces informations sont nécessaires pour Vereinsflieger et la facturation. Lors de l’export, « Nom, prénom » est généré automatiquement.;ui_or_system
+Eigenstart;fr;Décollage autonome;ui_or_system
+Eintrag nicht gefunden.;fr;Entrée introuvable.;ui_or_system
+Endpoint ist nicht korrekt installiert.;fr;Le point de terminaison n’est pas correctement installé.;ui_or_system
+Erfolgreich;fr;Réussi;ui_or_system
+exported;fr;Exporté;technical
+Exportiert;fr;Exporté;ui_or_system
+Exportjournal;fr;Journal des exports;ui_or_system
+Exportvorschau;fr;Aperçu de l’export;ui_or_system
+Externen Pilot / FI erfassen;fr;Saisir un pilote externe / FI;ui_or_system
+Externer Kontakt konnte nicht gespeichert werden:;fr;Le contact externe n’a pas pu être enregistré :;ui_or_system
+Externer Pilot / FI;fr;Pilote externe / FI;ui_or_system
+failed;fr;Échec;technical
+Fehlende kTrax-Daten importieren?;fr;Importer les données kTrax manquantes ?;ui_or_system
+Fehler;fr;Erreur;ui_or_system
+Fehler:;fr;Erreurs :;ui_or_system
+Flug korrigieren;fr;Corriger le vol;ui_or_system
+Flug manuell erfassen;fr;Saisir un vol manuellement;ui_or_system
+Flugart;fr;Type de vol;ui_or_system
+Flugbetrieb;fr;Opérations de vol;ui_or_system
+Flugdienstleiter;fr;Chef de service de vol;ui_or_system
+Flugdienstleiter hat den Betriebstag abgeschlossen und für VF freigegeben.;fr;Le chef de service de vol a clôturé la journée d’exploitation et l’a validée pour VF.;ui_or_system
+Flugdienstleiterdienst;fr;Service de chef de vol;ui_or_system
+Flugfreigaben;fr;Validations des vols;ui_or_system
+Flugzeit;fr;Durée du vol;ui_or_system
+Flugzeit:;fr;Durée du vol :;ui_or_system
+Freigabe nicht möglich. Pflichtfelder fehlen oder sind ungültig.;fr;Validation impossible. Des champs obligatoires sont manquants ou non valides.;ui_or_system
+Freigegeben;fr;Validé;ui_or_system
+Gestern;fr;Hier;ui_or_system
+glider_flight;fr;Vol en planeur;technical
+glider_tow;fr;Remorquage planeur;technical
+Heute;fr;Aujourd’hui;ui_or_system
+id fehlt;fr;id manque;ui_or_system
+imported;fr;Importé;technical
+Importieren;fr;Importer;ui_or_system
+importiert;fr;importé;ui_or_system
+in_review;fr;En cours de contrôle;ui_or_system
+in_sync;fr;Synchronisé;ui_or_system
+Inaktiv;fr;Inactif;ui_or_system
+Ja;fr;Oui;ui_or_system
+Kein Flugdienstleiter aktiv;fr;Aucun chef de service de vol actif;ui_or_system
+Kein Motorflug in dieser Operation vorhanden.;fr;Aucun vol moteur dans cette opération.;ui_or_system
+Kein Motorflug vorhanden.;fr;Aucun vol moteur disponible.;ui_or_system
+Kein Motorflug zugeordnet.;fr;Aucun vol moteur associé.;ui_or_system
+Kein Motorflug/Schlepp vorhanden.;fr;Aucun vol moteur/remorquage disponible.;ui_or_system
+Kein Segelflug in dieser Operation vorhanden.;fr;Aucun vol en planeur dans cette opération.;ui_or_system
+Kein Segelflug vorhanden.;fr;Aucun vol en planeur disponible.;ui_or_system
+Kein Segelflug zu diesem Motorflug vorhanden.;fr;Aucun vol en planeur correspondant à ce vol moteur.;ui_or_system
+Kein Segelflug zugeordnet.;fr;Aucun vol en planeur associé.;ui_or_system
+Keine;fr;Aucun;ui_or_system
+Keine Berechtigung.;fr;Autorisation insuffisante.;ui_or_system
+Keine Einträge im aktuellen Filter.;fr;Aucune entrée dans le filtre actuel.;ui_or_system
+Keine Flüge mit Korrektur erforderlich.;fr;Aucun vol nécessitant une correction.;ui_or_system
+Keine offenen Flüge.;fr;Aucun vol ouvert.;ui_or_system
+Keine strukturell unvollständigen Flugoperationen.;fr;Aucune opération de vol structurellement incomplète.;ui_or_system
+Keine Treffer;fr;Aucun résultat;ui_or_system
+Kommentar;fr;Commentaire;ui_or_system
+Kontakt übernehmen;fr;Enregistrer le contact;ui_or_system
+Kontakte;fr;Contacts;ui_or_system
+Korrektur;fr;Correction;ui_or_system
+Korrektur nötig;fr;Correction requise;ui_or_system
+kTrax-Import;fr;Import kTrax;ui_or_system
+kTrax-Import abgeschlossen.;fr;Import kTrax terminé.;ui_or_system
+kTrax-Import fehlgeschlagen.;fr;Échec de l’import kTrax.;ui_or_system
+kTrax-Import läuft...;fr;Import kTrax en cours…;ui_or_system
+Laden;fr;Charger;ui_or_system
+Laden...;fr;Chargement…;ui_or_system
+Landezeit;fr;Heure d’atterrissage;ui_or_system
+Landung;fr;Atterrissage;ui_or_system
+Landung:;fr;Atterrissage :;ui_or_system
+Letzte 7 Tage;fr;7 derniers jours;ui_or_system
+local_change_pending;fr;Modification locale en attente;ui_or_system
+Logout;fr;Se déconnecter;ui_or_system
+LSZJ Dashboard;fr;Tableau de bord LSZJ;ui_or_system
+Löschen;fr;Supprimer;ui_or_system
+Mailadresse;fr;Adresse e-mail;ui_or_system
+manual;fr;Saisie manuelle;technical
+Manuelle VF-Synchronisation;fr;Synchronisation manuelle avec VF;ui_or_system
+Method not allowed;fr;Méthode non autorisée;ui_or_system
+Methode nicht erlaubt.;fr;Méthode non autorisée.;ui_or_system
+Motorflug;fr;Vol moteur;ui_or_system
+Motorflug kann nicht erhalten werden: tow_callsign fehlt.;fr;Le vol moteur ne peut pas être conservé : tow_callsign manque.;ui_or_system
+Motorflug löschen;fr;Supprimer le vol moteur;ui_or_system
+Motorflugpilot;fr;Pilote avion;ui_or_system
+Motorminuten;fr;Minutes moteur;ui_or_system
+Motorpilot;fr;Pilote avion;ui_or_system
+Motorzeit;fr;Durée moteur;ui_or_system
+Nachname;fr;Nom;ui_or_system
+Nachname, Vorname, Mailadresse und Telefon sind Pflichtfelder.;fr;Le nom, le prénom, l’adresse e-mail et le téléphone sont obligatoires.;ui_or_system
+Nein;fr;Non;ui_or_system
+Neu importiert:;fr;Nouveaux imports :;ui_or_system
+Offen;fr;Ouvert;ui_or_system
+open;fr;Ouvert;ui_or_system
+Operation;fr;Opération;ui_or_system
+Operation nicht gefunden.;fr;Opération introuvable.;ui_or_system
+operation_id fehlt.;fr;operation_id manque.;ui_or_system
+operation_id oder action fehlt;fr;operation_id ou action manque;ui_or_system
+operation_id oder part fehlt.;fr;operation_id ou part manque.;ui_or_system
+pending;fr;Ouvert;technical
+Personen aus VF synchronisieren;fr;Synchroniser les personnes depuis VF;ui_or_system
+Pilot;fr;Pilote;ui_or_system
+Pilot Motorflug;fr;Pilote avion;ui_or_system
+Pilot Segelflug;fr;Pilote de planeur;ui_or_system
+ready_for_export;fr;Prêt pour l’export;ui_or_system
+reconciliation_required;fr;Rapprochement requis;ui_or_system
+Schlepp;fr;Remorquage;ui_or_system
+Schlepp zu Segelflug erfassen;fr;Saisir le remorquage pour le vol en planeur;ui_or_system
+Schlepppilot;fr;Pilote remorqueur;ui_or_system
+Schleppzeit;fr;Durée du remorquage;ui_or_system
+Schleppzeit:;fr;Durée du remorquage :;ui_or_system
+Schliessen;fr;Fermer;ui_or_system
+Segelflug;fr;Planeur;ui_or_system
+Segelflug löschen;fr;Supprimer le vol en planeur;ui_or_system
+Segelflug zu Schleppflug erfassen;fr;Saisir le vol en planeur pour le vol de remorquage;ui_or_system
+Segelflugpilot;fr;Pilote de planeur;ui_or_system
+Segelflugschlepp;fr;Remorquage planeur;ui_or_system
+Seit;fr;Depuis;ui_or_system
+self_launch;fr;Décollage autonome;technical
+skipped;fr;Ignoré;technical
+Speichern;fr;Enregistrer;ui_or_system
+Speichern & Freigeben;fr;Enregistrer et valider;ui_or_system
+Start;fr;Départ;ui_or_system
+Start:;fr;Départ :;ui_or_system
+Startzeit;fr;Heure de départ;ui_or_system
+Status;fr;Statut;ui_or_system
+success;fr;Réussi;ui_or_system
+Suche fehlgeschlagen;fr;Échec de la recherche;ui_or_system
+Tage geprüft:;fr;Jours contrôlés :;ui_or_system
+Tagesabschluss;fr;Clôture journalière;ui_or_system
+Tagesabschlussprüfung;fr;Contrôle de clôture journalière;ui_or_system
+Telefon;fr;Téléphone;ui_or_system
+tow_charge;fr;Frais de remorquage;technical
+towplane_only;fr;Vol moteur;technical
+towplane_own;fr;Vol moteur;technical
+Uhr;fr;h;ui_or_system
+Unbekannte Aktion.;fr;Action inconnue.;ui_or_system
+Ungültige Aktion;fr;Action non valide;ui_or_system
+Ungültige JSON-Daten.;fr;Données JSON non valides.;ui_or_system
+Ungültige oder abgelaufene Anfrage.;fr;Requête non valide ou expirée.;ui_or_system
+Vereinsflieger-CSV Export;fr;Export CSV Vereinsflieger;ui_or_system
+Von;fr;Du;ui_or_system
+Vorname;fr;Prénom;ui_or_system
+Warnung;fr;Avertissement;ui_or_system
+Weiter;fr;Continuer;ui_or_system
+Zeitraum:;fr;Période :;ui_or_system
+Zurück;fr;Retour;ui_or_system
+Zurück zum Dashboard;fr;Retour au tableau de bord;ui_or_system
+Änderungen, Korrekturen und Löschungen sind in der Flugfreigabemaske nicht mehr möglich.;fr;Les modifications, corrections et suppressions ne sont plus possibles dans l’écran de validation des vols.;ui_or_system
