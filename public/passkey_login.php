@@ -25,6 +25,7 @@ $legacyLoginEnabled = (bool)($config['auth']['legacy_login_enabled'] ?? true);
         .setup{padding:17px;border:1px solid var(--border);border-radius:10px;background:#fafbfc}.setup h2{margin:0 0 8px;font-size:1.12rem}.setup p{margin:6px 0;color:var(--muted);line-height:1.5}.setup-link{display:inline-flex;margin-top:10px;font-weight:700;color:var(--blue-dark)}
         .test-login{margin-top:28px;padding-top:18px;border-top:1px solid var(--border);font-size:.9rem;color:var(--muted)}.test-login a{color:#475467}.test-badge{display:inline-block;margin-right:7px;padding:2px 7px;border-radius:999px;background:#fff3cd;color:#73510d;font-size:.75rem;font-weight:800;text-transform:uppercase}
     </style>
+    <script src="i18n.js" defer></script>
 </head>
 <body>
 <main class="shell"><section class="login-card">

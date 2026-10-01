@@ -15,6 +15,7 @@ $csrf=csrf_token();
 <style>
 .ua-wrap{max-width:980px;margin:auto}.ua-search{position:relative}.ua-search input{width:100%;box-sizing:border-box;padding:10px}.ua-results{position:absolute;z-index:20;left:0;right:0;background:#fff;border:1px solid #bbb;max-height:300px;overflow:auto}.ua-results[hidden]{display:none}.ua-item{padding:10px;border-bottom:1px solid #eee;cursor:pointer}.ua-item:hover{background:#eef5ff}.ua-meta{font-size:12px;color:#667085}.ua-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px}.ua-role{border:1px solid #ccd3da;border-radius:8px;padding:10px}.ua-role label{display:block;margin-top:7px}.ua-role input[type=datetime-local]{width:100%;box-sizing:border-box}.ua-message{padding:10px;border-radius:7px}.ua-ok{background:#eefaf1}.ua-error{background:#fff0f0;color:#a00018}.muted{color:#667085}
 </style>
+    <script src="i18n.js" defer></script>
 </head>
 <body>
 <div class="ua-wrap">

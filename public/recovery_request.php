@@ -173,6 +173,7 @@ require_once __DIR__ . '/../src/session.php';
             }
         }
     </style>
+    <script src="i18n.js" defer></script>
 </head>
 <body>
 <main class="recovery-shell">

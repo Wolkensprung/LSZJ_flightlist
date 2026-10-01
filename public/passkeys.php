@@ -64,6 +64,7 @@ if (is_array($recoveryMarker)) {
         .recovery-notice p{margin:6px 0 0}
         @media(max-width:560px){.passkey-item{align-items:stretch;flex-direction:column}.danger-button{width:100%}}
     </style>
+    <script src="i18n.js" defer></script>
 </head>
 <body>
 <main class="passkey-wrap">

@@ -192,6 +192,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <style>
       .login-wrap{max-width:720px;margin:0 auto}.login-notice{padding:12px;border-left:5px solid #b7791f;background:#fff8e6;border-radius:6px}.login-error{padding:12px;border-left:5px solid #b00020;background:#fff0f0;color:#970018;border-radius:6px}.login-current{padding:14px;border-left:5px solid #17823b;background:#eefaf1;border-radius:6px}.login-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}.hint{color:#667085}
     </style>
+    <script src="i18n.js" defer></script>
 </head>
 <body>
 <div class="login-wrap">
