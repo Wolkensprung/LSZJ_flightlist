@@ -70,7 +70,7 @@ $activeDutyOfficer = duty_officer_active();
             font-size: 1.1rem;
         }
     </style>
-    <script src="i18n.js" defer></script>
+    <script src="i18n.js?v=20261003_3" defer></script>
 </head>
 <body>
 <header class="dashboard-header-actions"><a class="button secondary dashboard-logout" href="logout_qr.php">Logout</a></header>

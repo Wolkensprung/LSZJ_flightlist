@@ -18,7 +18,7 @@ require_role('ADMIN');
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>VF-Personenimport</title>
     <link rel="stylesheet" href="app.css">
-    <script src="i18n.js" defer></script>
+    <script src="i18n.js?v=20261003_3" defer></script>
 </head>
 <body>
 <div class="card">

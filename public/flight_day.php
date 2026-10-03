@@ -30,7 +30,7 @@ $today = date('Y-m-d');
         .form-block label { display: block; margin-bottom: .5rem; white-space: normal; }
         .form-block textarea { margin-left: 0; width: 100%; }
     </style>
-    <script src="i18n.js" defer></script>
+    <script src="i18n.js?v=20261003_3" defer></script>
 </head>
 <body>
 <div class="card">

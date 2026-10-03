@@ -41,7 +41,7 @@ $entryId = is_int($entryId) && $entryId > 0 ? $entryId : 0;
         .required-note { color:#7f1d1d; font-size:.9rem; }
         .field-changed > span:first-child::after { content:' geändert'; color:#b45309; font-size:.85rem; font-weight:700; }
     </style>
-    <script src="i18n.js" defer></script>
+    <script src="i18n.js?v=20261003_3" defer></script>
 </head>
 <body>
 <div class="card">

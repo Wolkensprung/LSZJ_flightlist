@@ -16,7 +16,7 @@ $today = date('Y-m-d');
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>VF-Flugexport C3</title>
 <link rel="stylesheet" href="app.css">
-    <script src="i18n.js" defer></script>
+    <script src="i18n.js?v=20261003_3" defer></script>
 </head>
 <body>
 <div class="card"><div class="row">

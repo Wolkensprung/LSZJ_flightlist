@@ -43,7 +43,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <style>
 body{font-family:Arial,sans-serif;max-width:820px;margin:30px auto;padding:0 16px;background:#f5f7fa;color:#1f2937}.card{background:#fff;padding:24px;border-radius:12px;box-shadow:0 2px 12px #0001;margin-bottom:18px}label{font-weight:700;display:block;margin:18px 0 7px}input{width:100%;box-sizing:border-box;padding:10px;border:1px solid #cbd5e1;border-radius:8px}button{margin-top:20px;background:#0b64c0;color:#fff;border:0;border-radius:8px;padding:11px 18px;font-size:16px}.ok{border-left:5px solid #16803c}.err{border-left:5px solid #b42318}.muted{color:#64748b;font-size:14px}
 </style>
-    <script src="i18n.js" defer></script>
+    <script src="i18n.js?v=20261003_3" defer></script>
 </head><body>
 <div class="card"><h1>Vereinsflieger-Stammdaten</h1>
 <p>Importiert die standardisierten CSV-Exporte. Mitglieder werden inklusive Vereinsflieger-Benutzernummer, Mailadresse und Mobilnummer gespeichert.</p>

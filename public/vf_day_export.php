@@ -31,7 +31,7 @@ $today = date('Y-m-d');
         .confirm-block label { display: block; white-space: normal; margin: .6rem 0; }
         details pre { overflow-x: auto; white-space: pre-wrap; }
     </style>
-    <script src="i18n.js" defer></script>
+    <script src="i18n.js?v=20261003_3" defer></script>
 </head>
 <body>
 <div class="card">

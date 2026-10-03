@@ -339,7 +339,7 @@
   }
 
   function translateAttributes(element){
-    ['title','placeholder','aria-label','value'].forEach(function(attr){
+    ['title','placeholder','aria-label','alt','value'].forEach(function(attr){
       if(!element.hasAttribute || !element.hasAttribute(attr)) return;
       if(attr === 'value' && ['button','submit','reset'].indexOf((element.type || '').toLowerCase()) < 0) return;
       const original = element.getAttribute(attr);

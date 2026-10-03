@@ -59,7 +59,7 @@ $handoverCandidates=$stmt->fetchAll();
 ?>
 <!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>LSZJ Flugdienstleiter</title><link rel="stylesheet" href="app.css"><style>
 .duty-actions{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px}.duty-actions .card{margin:0}.duty-actions label{display:block;margin:8px 0}.duty-actions select,.duty-actions textarea{display:block;width:100%;box-sizing:border-box}.alert-success{background:#eefaf1;padding:10px}.alert-error{background:#fff0f0;color:#a00018;padding:10px}
-</style>    <script src="i18n.js" defer></script>
+</style>    <script src="i18n.js?v=20261003_3" defer></script>
 </head><body>
 <div class="card"><div class="row"><div><strong>Angemeldet:</strong> <?= htmlspecialchars((string)$user['display_name'],ENT_QUOTES,'UTF-8') ?></div><div><strong>Rollen:</strong> <?= htmlspecialchars(implode(', ',$user['roles']??[]),ENT_QUOTES,'UTF-8') ?></div><div><a class="button secondary" href="dashboard.php">Dashboard</a></div><?php if($isAdmin): ?><div><a class="button secondary" href="user_admin.php">Benutzerverwaltung</a></div><?php endif; ?><div><a class="button secondary" href="logout.php">Logout</a></div></div></div>
 <h1>Flugdienstleiter</h1>

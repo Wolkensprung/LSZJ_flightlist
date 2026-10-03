@@ -1,7 +1,7 @@
 (() => {
   'use strict';
 
-  const pageBase = new URL('.', window.location.href);
+  const pageBase = new URL('.', window.location.href); const tr = key => window.lszjI18n ? window.lszjI18n.t(key) : key;
   const apiUrl = name => new URL(name, pageBase).toString();
   let showAllPilots = false;
 
@@ -33,7 +33,7 @@
     if (!firstPilot) return;
     const label = document.createElement('label');
     label.className = 'lszj-ac-toggle';
-    label.innerHTML = '<input type="checkbox"> Alle bekannten Piloten anzeigen';
+    label.innerHTML = '<input type="checkbox"> ' + tr('Alle bekannten Piloten anzeigen');
     label.querySelector('input').addEventListener('change', event => {
       showAllPilots = event.target.checked;
       document.querySelectorAll('[data-lszj-autocomplete="pilot"]').forEach(input => {
@@ -73,8 +73,8 @@
     panel.querySelector('.lszj-external-cancel').addEventListener('click',()=>{input.dataset.externalMode='0';hide();input.focus();});
     panel.querySelector('.lszj-external-save').addEventListener('click',async()=>{
       const data={action:'create',last_name:field('last_name').value.trim(),first_name:field('first_name').value.trim(),email:field('email').value.trim(),phone:field('phone').value.trim()};
-      if(!data.last_name||!data.first_name||!data.email||!data.phone){error.textContent='Nachname, Vorname, Mailadresse und Telefon sind Pflichtfelder.';error.hidden=false;return;}
-      if(!field('email').checkValidity()){error.textContent='Bitte eine gültige Mailadresse eingeben.';error.hidden=false;field('email').focus();return;}
+      if(!data.last_name||!data.first_name||!data.email||!data.phone){error.textContent=tr('Nachname, Vorname, Mailadresse und Telefon sind Pflichtfelder.');error.hidden=false;return;}
+      if(!field('email').checkValidity()){error.textContent=tr('Bitte eine gültige Mailadresse eingeben.');error.hidden=false;field('email').focus();return;}
       try{
         const response=await fetch(apiUrl('api_external_contacts.php'),{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)});
         const json=await response.json();
@@ -111,8 +111,8 @@
     const render=data=>{
       items=data;active=-1;list.innerHTML='';
       if(!data.length){
-        const empty=document.createElement('div');empty.className='lszj-ac-empty';empty.textContent='Keine Treffer';list.appendChild(empty);
-        if(type==='pilot'&&externalPanel){const button=document.createElement('button');button.type='button';button.className='lszj-ac-external-button';button.textContent='Externen Pilot / FI erfassen';button.addEventListener('mousedown',e=>{e.preventDefault();externalPanel.show(input.value.trim());});list.appendChild(button);}
+        const empty=document.createElement('div');empty.className='lszj-ac-empty';empty.textContent=tr('Keine Treffer');list.appendChild(empty);
+        if(type==='pilot'&&externalPanel){const button=document.createElement('button');button.type='button';button.className='lszj-ac-external-button';button.textContent=tr('Externen Pilot / FI erfassen');button.addEventListener('mousedown',e=>{e.preventDefault();externalPanel.show(input.value.trim());});list.appendChild(button);}
         list.hidden=false;return;
       }
       data.forEach(item=>{
@@ -130,7 +130,7 @@
       if(type==='pilot'&&showAllPilots&&!isLoginInput(input))url.searchParams.set('all','1');
       if(type==='pilot'&&isLoginInput(input))url.searchParams.set('context','login');
       try{const response=await fetch(url,{signal:controller.signal});if(!response.ok)throw new Error(`HTTP ${response.status}`);const json=await response.json();render(Array.isArray(json)?json:(json.items||[]));}
-      catch(error){if(error.name!=='AbortError'){list.innerHTML='<div class="lszj-ac-empty">Suche fehlgeschlagen</div>';list.hidden=false;}}
+      catch(error){if(error.name!=='AbortError'){list.innerHTML='<div class="lszj-ac-empty">'+tr('Suche fehlgeschlagen')+'</div>';list.hidden=false;}}
     });
     input.addEventListener('input',()=>{input.dataset.externalMode='0';delete input.dataset.externalContactId;delete input.dataset.sourceType;delete input.dataset.sourceId;delete input.dataset.userId;if(externalPanel)externalPanel.hide();search();});
     input.addEventListener('focus',()=>{if(input.value.trim()&&(input.dataset.externalMode!=='1'||isLoginInput(input)))search();});
