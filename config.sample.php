@@ -3,23 +3,21 @@ return [
     'db' => [
         'dsn' => 'mysql:host=localhost;port=3306;dbname=lszj_flightlist;charset=utf8mb4',
         'user' => 'lszj',
-        'password' => 'DB-USER_PASWWORT'
+        'password' => 'PASSWORT'
     ],
     'ktrax' => [
         'base_url' => 'https://ktrax.kisstech.ch/backend/logbook',
-        'api_key' => 'LSZJ-API_KEY',
+        'api_key' => 'PASSWORT',
         'default_airfield' => 'lszj',
     ],
     'app' => [
         'timezone' => 'Europe/Zurich',
-        // Unter PHP-FPM explizit die CLI-Binary angeben.
-        'php_cli_binary' => '/usr/local/php83/bin/php',
     ],
     'vereinsflieger_api' => [
     'base_url' => 'https://www.vereinsflieger.de/interface/rest',
     'username' => 'schnittstelle@lszj.ch',
-    'password' => 'STARKES PASSWORT',
-    'appkey' => 'APP-KEY-BEISPIEL',
+    'password' => 'PASSWORT',
+    'appkey' => 'PASSWORT',
     'cid' => '1488',
     'auth_secret' => '',
     ],
@@ -32,9 +30,27 @@ return [
         ],
     ],
 
-
     'auth' => [
     'allow_legacy_login' => true,
     ],
+
+'smtp' => [
+    'host' => 'asmtp.mail.hostpoint.ch',
+    'port' => 587,
+    'encryption' => 'tls',
+    'username' => 'startlist@lszj.ch',
+    'password' => 'PASSWORT',
+    'from_address' => 'startlist@lszj.ch',
+    'from_name' => 'LSZJ Startlist',
+],
+
+'recovery' => [
+    'base_url' => 'http://localhost:8000',
+],
+
+'qr_login' => [
+    'base_url' => 'http://localhost:8000',
+    'ttl_seconds' => 120,
+],
 
 ];
