@@ -53,29 +53,21 @@ function valid_airfield(string $airfield): bool
 
 function ktrax_day_exists(PDO $pdo, string $date, string $airfield): bool
 {
+    /*
+     * Ein Importlog allein beweist nicht, dass ein sichtbarer Flug existiert.
+     * Auch raw_flights können nach einem unvollständigen Lauf ohne sichtbare
+     * Operation und ohne accounting_entry zurückbleiben.
+     *
+     * Ein kTrax-Tag gilt deshalb nur dann als bereits vorhanden, wenn eine
+     * kTrax-Operation mit mindestens einem Buchungseintrag existiert.
+     */
     $statement = $pdo->prepare(
-        "SELECT COUNT(*) FROM ktrax_import_log
-         WHERE import_date = ? AND airfield = ? AND status = 'success'"
-    );
-    $statement->execute([$date, strtoupper($airfield)]);
-
-    if ((int)$statement->fetchColumn() > 0) {
-        return true;
-    }
-
-    $statement = $pdo->prepare(
-        "SELECT COUNT(*) FROM raw_flights
-         WHERE source = 'ktrax' AND flight_date = ?"
-    );
-    $statement->execute([$date]);
-
-    if ((int)$statement->fetchColumn() > 0) {
-        return true;
-    }
-
-    $statement = $pdo->prepare(
-        "SELECT COUNT(*) FROM operations
-         WHERE created_from = 'ktrax' AND operation_date = ?"
+        "SELECT COUNT(DISTINCT o.id)
+         FROM operations o
+         INNER JOIN accounting_entries e
+                 ON e.operation_id = o.id
+         WHERE o.created_from = 'ktrax'
+           AND o.operation_date = ?"
     );
     $statement->execute([$date]);
 
@@ -373,6 +365,7 @@ try {
 
     $details = [];
     $daysImported = 0;
+    $daysEmpty = 0;
     $daysSkipped = 0;
     $daysFailed = 0;
 
@@ -395,19 +388,29 @@ try {
 
         try {
             $data = run_ktrax_day_import($date, $airfield, $perDayTimeout);
-            $daysImported++;
+            $hasVisibleData = ktrax_day_exists($pdo, $date, $airfield);
+            $logStatus = $hasVisibleData ? 'success' : 'empty';
+            $message = $hasVisibleData
+                ? 'importiert'
+                : 'Keine sichtbaren kTrax-Flüge für diesen Tag gefunden.';
+
+            if ($hasVisibleData) {
+                $daysImported++;
+            } else {
+                $daysEmpty++;
+            }
 
             log_ktrax_import(
                 $pdo,
                 $date,
                 $airfield,
-                'success',
-                $data + ['message' => 'importiert']
+                $logStatus,
+                $data + ['message' => $message]
             );
 
             $details[] = [
                 'date' => $date,
-                'status' => 'imported',
+                'status' => $hasVisibleData ? 'imported' : 'empty',
                 'raw_imported' => $data['raw_imported'] ?? null,
                 'operations_created' => $data['operations_created'] ?? null,
                 'operations_skipped_existing' =>
@@ -416,7 +419,7 @@ try {
                     $data['tow_segments_created'] ?? null,
                 'towplane_own_entries_created' =>
                     $data['towplane_own_entries_created'] ?? null,
-                'message' => 'importiert',
+                'message' => $message,
             ];
         } catch (Throwable $error) {
             $daysFailed++;
@@ -445,6 +448,7 @@ try {
         'airfield' => strtoupper($airfield),
         'days_checked' => $days,
         'days_imported' => $daysImported,
+        'days_empty' => $daysEmpty,
         'days_skipped' => $daysSkipped,
         'days_failed' => $daysFailed,
         'details' => $details,
